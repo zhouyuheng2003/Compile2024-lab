@@ -1,1 +1,0 @@
-docker run -it --rm -v K:\Document\Compile2024-lab:/root/compiler maxxing/compiler-dev bash
