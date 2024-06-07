@@ -107,3 +107,4 @@ Number
 void yyerror(unique_ptr<string> &ast, const char *s) {
   cerr << "error: " << s << endl;
 }
+  
