@@ -6,7 +6,7 @@
 #include <cassert>
 #include <map>
 #include <variant>
-
+using namespace std;
 
 static int symbol_num = 0;
 static int if_else_num = 0;
@@ -17,19 +17,19 @@ enum class StmtType { if_, ifelse, simple, while_ };
 enum class SimpleStmtType { lval, exp, block, ret, break_, continue_ };
 enum class DeclType { const_decl, var_decl };
 enum class BlockItemType { decl, stmt };
-static std::vector<std::map<std::string, std::variant<int, std::string>>>
+static vector<map<string, variant<int, string>>>
     symbol_tables;
-static std::map<std::string, int> var_num;
-static std::vector<int> while_stack;
-static std::map<std::string, std::string> function_table;
-static std::map<std::string, std::string> function_ret_type;
-static std::map<std::string, int> function_param_num;
-static std::map<std::string, std::vector<std::string>> function_param_idents;
-static std::map<std::string, std::vector<std::string>> function_param_names;
-static std::string present_func_type;
+static map<string, int> var_num;
+static vector<int> while_stack;
+static map<string, string> function_table;
+static map<string, string> function_ret_type;
+static map<string, int> function_param_num;
+static map<string, vector<string>> function_param_idents;
+static map<string, vector<string>> function_param_names;
+static string present_func_type;
 
 
-static std::variant<int, std::string> look_up_symbol_tables(std::string l_val)
+static variant<int, string> look_up_symbol_tables(string l_val)
 {
     for (auto it = symbol_tables.rbegin(); it != symbol_tables.rend(); it++)
         if (it->count(l_val))
@@ -44,34 +44,34 @@ class BaseAST
 public:
     virtual ~BaseAST() = default;
     virtual void dump() const = 0;
-    virtual std::string dumpIR() const = 0;
+    virtual string dumpIR() const = 0;
     virtual int dumpExp() const { assert(false); return -1; }
-    virtual std::string get_ident() const { assert(false); return ""; }
+    virtual string get_ident() const { assert(false); return ""; }
 };
 
 
 class CompUnitAST : public BaseAST
 {
 public:
-    std::vector<std::unique_ptr<BaseAST>> func_def_list;
-    std::vector<std::unique_ptr<BaseAST>> decl_list;
+    vector<unique_ptr<BaseAST>> func_def_list;
+    vector<unique_ptr<BaseAST>> decl_list;
     void dump() const override
     {
-        std::cout << "CompUnitAST { ";
+        cout << "CompUnitAST { ";
         for (auto&& func_def : func_def_list)
             func_def->dump();
-        std::cout << " } ";
+        cout << " } ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::cout << "decl @getint(): i32" << std::endl;
-        std::cout << "decl @getch(): i32" << std::endl;
-        std::cout << "decl @getarray(*i32): i32" << std::endl;
-        std::cout << "decl @putint(i32)" << std::endl;
-        std::cout << "decl @putch(i32)" << std::endl;
-        std::cout << "decl @putarray(i32, *i32)" << std::endl;
-        std::cout << "decl @starttime()" << std::endl;
-        std::cout << "decl @stoptime()" << std::endl << std::endl;
+        cout << "decl @getint(): i32" << endl;
+        cout << "decl @getch(): i32" << endl;
+        cout << "decl @getarray(*i32): i32" << endl;
+        cout << "decl @putint(i32)" << endl;
+        cout << "decl @putch(i32)" << endl;
+        cout << "decl @putarray(i32, *i32)" << endl;
+        cout << "decl @starttime()" << endl;
+        cout << "decl @stoptime()" << endl << endl;
         function_table["getint"] = "@getint";
         function_table["getch"] = "@getch";
         function_table["getarray"] = "@getarray";
@@ -96,10 +96,10 @@ public:
         function_param_num["putarray"] = 2;
         function_param_num["starttime"] = 0;
         function_param_num["stoptime"] = 0;
-        std::map<std::string, std::variant<int, std::string>> global_syms;
+        map<string, variant<int, string>> global_syms;
         symbol_tables.push_back(global_syms);
         for (auto&& decl : decl_list)decl->dumpExp();
-        std::cout << std::endl;
+        cout << endl;
         for (auto&& func_def : func_def_list)func_def->dumpIR();
         symbol_tables.pop_back();
         return "";
@@ -110,73 +110,73 @@ public:
 class FuncFParamAST : public BaseAST
 {
 public:
-    std::string b_type;
-    std::string ident;
-    void dump() const override { std::cout << b_type << " " << ident; }
-    std::string dumpIR() const override
+    string b_type;
+    string ident;
+    void dump() const override { cout << b_type << " " << ident; }
+    string dumpIR() const override
     {
         assert(b_type == "int");
-        std::string param_name = "@" + ident;
-        std::string name = param_name + "_" +
-            std::to_string(var_num[param_name]++);
-        std::cout << name;
+        string param_name = "@" + ident;
+        string name = param_name + "_" +
+            to_string(var_num[param_name]++);
+        cout << name;
         return name;
     }
-    std::string get_ident() const override { return ident; }
+    string get_ident() const override { return ident; }
 };
 
 
 class FuncDefAST : public BaseAST
 {
 public:
-    std::string func_type;
-    std::string ident;
-    std::vector<std::unique_ptr<BaseAST>> params;
-    std::unique_ptr<BaseAST> block;
+    string func_type;
+    string ident;
+    vector<unique_ptr<BaseAST>> params;
+    unique_ptr<BaseAST> block;
     void dump() const override
     {
-        std::cout << "FuncDefAST { " << func_type << ", " << ident << ", ";
+        cout << "FuncDefAST { " << func_type << ", " << ident << ", ";
         for (int i = 0; i < params.size(); i++)
         {
             params[i]->dump();
-            if (i != params.size() - 1)std::cout << ", ";
+            if (i != params.size() - 1)cout << ", ";
         }
         block->dump();
-        std::cout << " } ";
+        cout << " } ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string name = "@" + ident;
+        string name = "@" + ident;
         assert(!symbol_tables[0].count(ident));
         assert(!function_table.count(ident));
         function_table[ident] = name;
         function_ret_type[ident] = func_type;
         function_param_num[ident] = params.size();
         present_func_type = func_type;
-        std::vector<std::string> idents, names;
-        std::cout << "fun " << name << "(";
+        vector<string> idents, names;
+        cout << "fun " << name << "(";
         for (int i = 0; i < params.size(); i++)
         {
             idents.push_back(params[i]->get_ident());
             names.push_back(params[i]->dumpIR());
-            std::cout << ": i32";
-            if (i != params.size() - 1)std::cout << ", ";
+            cout << ": i32";
+            if (i != params.size() - 1)cout << ", ";
         }
         function_param_idents[ident] = move(idents);
         function_param_names[ident] = move(names);
-        std::cout << ")";
-        if (func_type == "int")std::cout << ": i32";
+        cout << ")";
+        if (func_type == "int")cout << ": i32";
         else if (func_type != "void")assert(false);
-        std::cout << " {" << std::endl << "\%entry_" << ident << ":" <<
-            std::endl;
-        std::string block_type = block->dumpIR();
+        cout << " {" << endl << "\%entry_" << ident << ":" <<
+            endl;
+        string block_type = block->dumpIR();
         if (block_type != "ret")
         {
-            if (func_type == "int")std::cout << "\tret 0" << std::endl;
-            else if (func_type == "void")std::cout << "\tret" << std::endl;
+            if (func_type == "int")cout << "\tret 0" << endl;
+            else if (func_type == "void")cout << "\tret" << endl;
             else assert(false);
         }
-        std::cout << "}" << std::endl << std::endl;
+        cout << "}" << endl << endl;
         return block_type;
     }
 };
@@ -185,30 +185,30 @@ public:
 class BlockAST : public BaseAST
 {
 public:
-    std::vector<std::unique_ptr<BaseAST>> block_item_list;
-    std::string func = "";
+    vector<unique_ptr<BaseAST>> block_item_list;
+    string func = "";
     void dump() const override
     {
-        std::cout << "BlockAST { ";
+        cout << "BlockAST { ";
         for (auto&& block_item : block_item_list)block_item->dump();
-        std::cout << " } ";
+        cout << " } ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string block_type = "";
-        std::map<std::string, std::variant<int, std::string>> symbol_table;
+        string block_type = "";
+        map<string, variant<int, string>> symbol_table;
         if (func != "")
         {
-            std::vector<std::string> idents = function_param_idents[func];
-            std::vector<std::string> names = function_param_names[func];
+            vector<string> idents = function_param_idents[func];
+            vector<string> names = function_param_names[func];
             for (int i = 0; i < names.size(); i++)
             {
-                std::string ident = idents[i];
-                std::string name = names[i]; name[0] = '%';
+                string ident = idents[i];
+                string name = names[i]; name[0] = '%';
                 symbol_table[ident] = name;
-                std::cout << '\t' << name << " = alloc i32" << std::endl;
-                std::cout << "\tstore " << names[i] << ", " << name <<
-                    std::endl;
+                cout << '\t' << name << " = alloc i32" << endl;
+                cout << "\tstore " << names[i] << ", " << name <<
+                    endl;
             }
         }
         symbol_tables.push_back(symbol_table);
@@ -228,104 +228,104 @@ class StmtAST : public BaseAST
 {
 public:
     StmtType type;
-    std::unique_ptr<BaseAST> exp_simple;
-    std::unique_ptr<BaseAST> if_stmt;
-    std::unique_ptr<BaseAST> else_stmt;
-    std::unique_ptr<BaseAST> while_stmt;
+    unique_ptr<BaseAST> exp_simple;
+    unique_ptr<BaseAST> if_stmt;
+    unique_ptr<BaseAST> else_stmt;
+    unique_ptr<BaseAST> while_stmt;
     void dump() const override
     {
         if (type == StmtType::simple)
         {
-            std::cout << "StmtAST { ";
+            cout << "StmtAST { ";
             exp_simple->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else if (type == StmtType::if_)
         {
-            std::cout << "IF { ";
+            cout << "IF { ";
             exp_simple->dump();
-            std::cout << " } THEN { ";
+            cout << " } THEN { ";
             if_stmt->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else if (type == StmtType::ifelse)
         {
-            std::cout << "IF { ";
+            cout << "IF { ";
             exp_simple->dump();
-            std::cout << " } THEN { ";
+            cout << " } THEN { ";
             if_stmt->dump();
-            std::cout << " } ELSE { ";
+            cout << " } ELSE { ";
             else_stmt->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else if (type == StmtType::while_)
         {
-            std::cout << "WHILE { ";
+            cout << "WHILE { ";
             exp_simple->dump();
-            std::cout << " } DO { ";
+            cout << " } DO { ";
             while_stmt->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else assert(false);
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         if (type == StmtType::simple)return exp_simple->dumpIR();
         else if (type == StmtType::if_)
         {
-            std::string if_result = exp_simple->dumpIR();
-            std::string then_label = "\%then_" + std::to_string(if_else_num);
-            std::string end_label = "\%end_" + std::to_string(if_else_num++);
-            std::cout << "\tbr " << if_result << ", " << then_label << ", " <<
-                end_label << std::endl;
-            std::cout << then_label << ":" << std::endl;
-            std::string if_stmt_type = if_stmt->dumpIR();
+            string if_result = exp_simple->dumpIR();
+            string then_label = "\%then_" + to_string(if_else_num);
+            string end_label = "\%end_" + to_string(if_else_num++);
+            cout << "\tbr " << if_result << ", " << then_label << ", " <<
+                end_label << endl;
+            cout << then_label << ":" << endl;
+            string if_stmt_type = if_stmt->dumpIR();
             if (if_stmt_type != "ret" && if_stmt_type != "break" &&
                 if_stmt_type != "cont")
-                std::cout << "\tjump " << end_label << std::endl;
-            std::cout << end_label << ":" << std::endl;
+                cout << "\tjump " << end_label << endl;
+            cout << end_label << ":" << endl;
         }
         else if (type == StmtType::ifelse)
         {
-            std::string if_result = exp_simple->dumpIR();
-            std::string then_label = "\%then_" + std::to_string(if_else_num);
-            std::string else_label = "\%else_" + std::to_string(if_else_num);
-            std::string end_label = "\%end_" + std::to_string(if_else_num++);
-            std::cout << "\tbr " << if_result << ", " << then_label << ", " <<
-                else_label << std::endl;
-            std::cout << then_label << ":" << std::endl;
-            std::string if_stmt_type = if_stmt->dumpIR();
+            string if_result = exp_simple->dumpIR();
+            string then_label = "\%then_" + to_string(if_else_num);
+            string else_label = "\%else_" + to_string(if_else_num);
+            string end_label = "\%end_" + to_string(if_else_num++);
+            cout << "\tbr " << if_result << ", " << then_label << ", " <<
+                else_label << endl;
+            cout << then_label << ":" << endl;
+            string if_stmt_type = if_stmt->dumpIR();
             if (if_stmt_type != "ret" && if_stmt_type != "break" &&
                 if_stmt_type != "cont")
-                std::cout << "\tjump " << end_label << std::endl;
-            std::cout << else_label << ":" << std::endl;
-            std::string else_stmt_type = else_stmt->dumpIR();
+                cout << "\tjump " << end_label << endl;
+            cout << else_label << ":" << endl;
+            string else_stmt_type = else_stmt->dumpIR();
             if (else_stmt_type != "ret" && else_stmt_type != "break" &&
                 else_stmt_type != "cont")
-                std::cout << "\tjump " << end_label << std::endl;
+                cout << "\tjump " << end_label << endl;
             if ((if_stmt_type == "ret" || if_stmt_type == "break" ||
                 if_stmt_type == "cont") && (else_stmt_type == "ret" ||
                 else_stmt_type == "break" || else_stmt_type == "cont"))
                 return "ret";
-            else std::cout << end_label << ":" << std::endl;
+            else cout << end_label << ":" << endl;
         }
         else if (type == StmtType::while_)
         {
-            std::string entry_label = "\%while_" + std::to_string(while_num);
-            std::string body_label = "\%do_" + std::to_string(while_num);
-            std::string end_label = "\%while_end_" + std::to_string(while_num);
+            string entry_label = "\%while_" + to_string(while_num);
+            string body_label = "\%do_" + to_string(while_num);
+            string end_label = "\%while_end_" + to_string(while_num);
             while_stack.push_back(while_num++);
-            std::cout << "\tjump " << entry_label << std::endl;
-            std::cout << entry_label << ":" << std::endl;
-            std::string while_result = exp_simple->dumpIR();
-            std::cout << "\tbr " << while_result << ", " << body_label << ", "
-                << end_label << std::endl;
-            std::cout << body_label << ":" << std::endl;
-            std::string while_stmt_type = while_stmt->dumpIR();
+            cout << "\tjump " << entry_label << endl;
+            cout << entry_label << ":" << endl;
+            string while_result = exp_simple->dumpIR();
+            cout << "\tbr " << while_result << ", " << body_label << ", "
+                << end_label << endl;
+            cout << body_label << ":" << endl;
+            string while_stmt_type = while_stmt->dumpIR();
             if (while_stmt_type != "ret" && while_stmt_type != "break" &&
                 while_stmt_type != "cont")
-                std::cout << "\tjump " << entry_label << std::endl;
-            std::cout << end_label << ":" << std::endl;
+                cout << "\tjump " << entry_label << endl;
+            cout << end_label << ":" << endl;
             while_stack.pop_back();
         }
         else assert(false);
@@ -338,65 +338,65 @@ class SimpleStmtAST : public BaseAST
 {
 public:
     SimpleStmtType type;
-    std::string lval;
-    std::unique_ptr<BaseAST> block_exp;
+    string lval;
+    unique_ptr<BaseAST> block_exp;
     void dump() const override
     {
         if (type == SimpleStmtType::ret)
         {
-            std::cout << "RETURN { ";
+            cout << "RETURN { ";
             block_exp->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else if (type == SimpleStmtType::lval)
         {
-            std::cout << "LVAL { " << lval << " = ";
+            cout << "LVAL { " << lval << " = ";
             block_exp->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
         else if (type == SimpleStmtType::exp)
         {
             if (block_exp != nullptr)
             {
-                std::cout << "EXP { ";
+                cout << "EXP { ";
                 block_exp->dump();
-                std::cout << " } ";
+                cout << " } ";
             }
         }
         else if (type == SimpleStmtType::block)
         {
-            std::cout << "BLOCK { ";
+            cout << "BLOCK { ";
             block_exp->dump();
-            std::cout << " } ";
+            cout << " } ";
         }
-        else if (type == SimpleStmtType::break_)std::cout << "BREAK ";
-        else if (type == SimpleStmtType::continue_)std::cout << "CONTINUE ";
+        else if (type == SimpleStmtType::break_)cout << "BREAK ";
+        else if (type == SimpleStmtType::continue_)cout << "CONTINUE ";
         else assert(false);
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         if (type == SimpleStmtType::ret)
         {
             if (block_exp == nullptr)
             {
                 if (present_func_type == "int")
-                    std::cout << "\tret 0" << std::endl;
-                else std::cout << "\tret" << std::endl;
+                    cout << "\tret 0" << endl;
+                else cout << "\tret" << endl;
             }
             else
             {
-                std::string result_var = block_exp->dumpIR();
-                std::cout << "\tret " << result_var << std::endl;
+                string result_var = block_exp->dumpIR();
+                cout << "\tret " << result_var << endl;
             }
             return "ret";
         }
         else if (type == SimpleStmtType::lval)
         {
-            std::string result_var = block_exp->dumpIR();
-            std::variant<int, std::string> value = look_up_symbol_tables(lval);
+            string result_var = block_exp->dumpIR();
+            variant<int, string> value = look_up_symbol_tables(lval);
             assert(value.index() == 1);
-            std::cout << "\tstore " << result_var << ", " <<
-                std::get<std::string>(value) << std::endl;
+            cout << "\tstore " << result_var << ", " <<
+                get<string>(value) << endl;
         }
         else if (type == SimpleStmtType::exp)
         {
@@ -407,16 +407,16 @@ public:
         {
             assert(!while_stack.empty());
             int while_no = while_stack.back();
-            std::string end_label = "\%while_end_" + std::to_string(while_no);
-            std::cout << "\tjump " << end_label << std::endl;
+            string end_label = "\%while_end_" + to_string(while_no);
+            cout << "\tjump " << end_label << endl;
             return "break";
         }
         else if (type == SimpleStmtType::continue_)
         {
             assert(!while_stack.empty());
             int while_no = while_stack.back();
-            std::string entry_label = "\%while_" + std::to_string(while_no);
-            std::cout << "\tjump " << entry_label << std::endl;
+            string entry_label = "\%while_" + to_string(while_no);
+            cout << "\tjump " << entry_label << endl;
             return "cont";
         }
         else assert(false);
@@ -428,14 +428,14 @@ public:
 class ExpAST : public BaseAST
 {
 public:
-    std::unique_ptr<BaseAST> l_or_exp;
+    unique_ptr<BaseAST> l_or_exp;
     void dump() const override
     {
-        std::cout << "ExpAST { ";
+        cout << "ExpAST { ";
         l_or_exp->dump();
-        std::cout << " } ";
+        cout << " } ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         return l_or_exp->dumpIR();
     }
@@ -449,48 +449,48 @@ public:
 class LOrExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> l_and_exp;
-    std::unique_ptr<BaseAST> l_or_exp;
+    string op;
+    unique_ptr<BaseAST> l_and_exp;
+    unique_ptr<BaseAST> l_or_exp;
     void dump() const override
     {
         if (op == "")l_and_exp->dump();
         else
         {
             l_or_exp->dump();
-            std::cout << op;
+            cout << op;
             l_and_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = l_and_exp->dumpIR();
         else if (op == "||")
         {
-            std::string left_result = l_or_exp->dumpIR();
-            std::string then_label = "\%then_" + std::to_string(if_else_num);
-            std::string else_label = "\%else_" + std::to_string(if_else_num);
-            std::string end_label = "\%end_" + std::to_string(if_else_num++);
-            std::string result_var_ptr = "%" + std::to_string(symbol_num++);
-            std::cout << '\t' << result_var_ptr << " = alloc i32" << std::endl;
-            std::cout << "\tbr " << left_result << ", " << then_label << ", "
-                << else_label << std::endl;
-            std::cout << then_label << ":" << std::endl;
-            std::cout << "\tstore 1, " << result_var_ptr << std::endl;
-            std::cout << "\tjump " << end_label << std::endl;
-            std::cout << else_label << ":" << std::endl;
-            std::string tmp_result_var = "%" + std::to_string(symbol_num++);
-            std::string right_result = l_and_exp->dumpIR();
-            std::cout << '\t' << tmp_result_var << " = ne " << right_result
-                << ", 0" << std::endl;
-            std::cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
-                << std::endl;
-            std::cout << "\tjump " << end_label << std::endl;
-            std::cout << end_label << ":" << std::endl;
-            result_var = "%" + std::to_string(symbol_num++);
-            std::cout << '\t' << result_var << " = load " << result_var_ptr
-                << std::endl;
+            string left_result = l_or_exp->dumpIR();
+            string then_label = "\%then_" + to_string(if_else_num);
+            string else_label = "\%else_" + to_string(if_else_num);
+            string end_label = "\%end_" + to_string(if_else_num++);
+            string result_var_ptr = "%" + to_string(symbol_num++);
+            cout << '\t' << result_var_ptr << " = alloc i32" << endl;
+            cout << "\tbr " << left_result << ", " << then_label << ", "
+                << else_label << endl;
+            cout << then_label << ":" << endl;
+            cout << "\tstore 1, " << result_var_ptr << endl;
+            cout << "\tjump " << end_label << endl;
+            cout << else_label << ":" << endl;
+            string tmp_result_var = "%" + to_string(symbol_num++);
+            string right_result = l_and_exp->dumpIR();
+            cout << '\t' << tmp_result_var << " = ne " << right_result
+                << ", 0" << endl;
+            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
+                << endl;
+            cout << "\tjump " << end_label << endl;
+            cout << end_label << ":" << endl;
+            result_var = "%" + to_string(symbol_num++);
+            cout << '\t' << result_var << " = load " << result_var_ptr
+                << endl;
         }
         else assert(false);
         return result_var;
@@ -514,48 +514,48 @@ public:
 class LAndExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> eq_exp;
-    std::unique_ptr<BaseAST> l_and_exp;
+    string op;
+    unique_ptr<BaseAST> eq_exp;
+    unique_ptr<BaseAST> l_and_exp;
     void dump() const override
     {
         if (op == "")eq_exp->dump();
         else
         {
             l_and_exp->dump();
-            std::cout << op;
+            cout << op;
             eq_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = eq_exp->dumpIR();
         else if (op == "&&")
         {
-            std::string left_result = l_and_exp->dumpIR();
-            std::string then_label = "\%then_" + std::to_string(if_else_num);
-            std::string else_label = "\%else_" + std::to_string(if_else_num);
-            std::string end_label = "\%end_" + std::to_string(if_else_num++);
-            std::string result_var_ptr = "%" + std::to_string(symbol_num++);
-            std::cout << '\t' << result_var_ptr << " = alloc i32" << std::endl;
-            std::cout << "\tbr " << left_result << ", " << then_label << ", "
-                << else_label << std::endl;
-            std::cout << then_label << ":" << std::endl;
-            std::string tmp_result_var = "%" + std::to_string(symbol_num++);
-            std::string right_result = eq_exp->dumpIR();
-            std::cout << '\t' << tmp_result_var << " = ne " << right_result
-                << ", 0" << std::endl;
-            std::cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
-                << std::endl;
-            std::cout << "\tjump " << end_label << std::endl;
-            std::cout << else_label << ":" << std::endl;
-            std::cout << "\tstore 0, " << result_var_ptr << std::endl;
-            std::cout << "\tjump " << end_label << std::endl;
-            std::cout << end_label << ":" << std::endl;
-            result_var = "%" + std::to_string(symbol_num++);
-            std::cout << '\t' << result_var << " = load " << result_var_ptr
-                << std::endl;
+            string left_result = l_and_exp->dumpIR();
+            string then_label = "\%then_" + to_string(if_else_num);
+            string else_label = "\%else_" + to_string(if_else_num);
+            string end_label = "\%end_" + to_string(if_else_num++);
+            string result_var_ptr = "%" + to_string(symbol_num++);
+            cout << '\t' << result_var_ptr << " = alloc i32" << endl;
+            cout << "\tbr " << left_result << ", " << then_label << ", "
+                << else_label << endl;
+            cout << then_label << ":" << endl;
+            string tmp_result_var = "%" + to_string(symbol_num++);
+            string right_result = eq_exp->dumpIR();
+            cout << '\t' << tmp_result_var << " = ne " << right_result
+                << ", 0" << endl;
+            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
+                << endl;
+            cout << "\tjump " << end_label << endl;
+            cout << else_label << ":" << endl;
+            cout << "\tstore 0, " << result_var_ptr << endl;
+            cout << "\tjump " << end_label << endl;
+            cout << end_label << ":" << endl;
+            result_var = "%" + to_string(symbol_num++);
+            cout << '\t' << result_var << " = load " << result_var_ptr
+                << endl;
         }
         else assert(false);
         return result_var;
@@ -579,34 +579,34 @@ public:
 class EqExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> rel_exp;
-    std::unique_ptr<BaseAST> eq_exp;
+    string op;
+    unique_ptr<BaseAST> rel_exp;
+    unique_ptr<BaseAST> eq_exp;
     void dump() const override
     {
         if (op == "")rel_exp->dump();
         else
         {
             eq_exp->dump();
-            std::cout << op;
+            cout << op;
             rel_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = rel_exp->dumpIR();
         else
         {
-            std::string left_result = eq_exp->dumpIR();
-            std::string right_result = rel_exp->dumpIR();
-            result_var = "%" + std::to_string(symbol_num++);
+            string left_result = eq_exp->dumpIR();
+            string right_result = rel_exp->dumpIR();
+            result_var = "%" + to_string(symbol_num++);
             if (op == "==")
-                std::cout << '\t' << result_var << " = eq " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = eq " << left_result <<
+                    ", " << right_result << endl;
             else if (op == "!=")
-                std::cout << '\t' << result_var << " = ne " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = ne " << left_result <<
+                    ", " << right_result << endl;
             else assert(false);
         }
         return result_var;
@@ -631,40 +631,40 @@ public:
 class RelExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> add_exp;
-    std::unique_ptr<BaseAST> rel_exp;
+    string op;
+    unique_ptr<BaseAST> add_exp;
+    unique_ptr<BaseAST> rel_exp;
     void dump() const override
     {
         if (op == "")add_exp->dump();
         else
         {
             rel_exp->dump();
-            std::cout << op;
+            cout << op;
             add_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = add_exp->dumpIR();
         else
         {
-            std::string left_result = rel_exp->dumpIR();
-            std::string right_result = add_exp->dumpIR();
-            result_var = "%" + std::to_string(symbol_num++);
+            string left_result = rel_exp->dumpIR();
+            string right_result = add_exp->dumpIR();
+            result_var = "%" + to_string(symbol_num++);
             if (op == "<")
-                std::cout << '\t' << result_var << " = lt " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = lt " << left_result <<
+                    ", " << right_result << endl;
             else if (op == ">")
-                std::cout << '\t' << result_var << " = gt " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = gt " << left_result <<
+                    ", " << right_result << endl;
             else if (op == "<=")
-                std::cout << '\t' << result_var << " = le " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = le " << left_result <<
+                    ", " << right_result << endl;
             else if (op == ">=")
-                std::cout << '\t' << result_var << " = ge " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = ge " << left_result <<
+                    ", " << right_result << endl;
             else assert(false);
         }
         return result_var;
@@ -691,34 +691,34 @@ public:
 class AddExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> mul_exp;
-    std::unique_ptr<BaseAST> add_exp;
+    string op;
+    unique_ptr<BaseAST> mul_exp;
+    unique_ptr<BaseAST> add_exp;
     void dump() const override
     {
         if (op == "")mul_exp->dump();
         else
         {
             add_exp->dump();
-            std::cout << op;
+            cout << op;
             mul_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = mul_exp->dumpIR();
         else
         {
-            std::string left_result = add_exp->dumpIR();
-            std::string right_result = mul_exp->dumpIR();
-            result_var = "%" + std::to_string(symbol_num++);
+            string left_result = add_exp->dumpIR();
+            string right_result = mul_exp->dumpIR();
+            result_var = "%" + to_string(symbol_num++);
             if (op == "+")
-                std::cout << '\t' << result_var << " = add " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = add " << left_result <<
+                    ", " << right_result << endl;
             else if (op == "-")
-                std::cout << '\t' << result_var << " = sub " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = sub " << left_result <<
+                    ", " << right_result << endl;
             else assert(false);
         }
         return result_var;
@@ -743,37 +743,37 @@ public:
 class MulExpAST : public BaseAST
 {
 public:
-    std::string op;
-    std::unique_ptr<BaseAST> unary_exp;
-    std::unique_ptr<BaseAST> mul_exp;
+    string op;
+    unique_ptr<BaseAST> unary_exp;
+    unique_ptr<BaseAST> mul_exp;
     void dump() const override
     {
         if (op == "")unary_exp->dump();
         else
         {
             mul_exp->dump();
-            std::cout << op;
+            cout << op;
             unary_exp->dump();
         }
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (op == "")result_var = unary_exp->dumpIR();
         else
         {
-            std::string left_result = mul_exp->dumpIR();
-            std::string right_result = unary_exp->dumpIR();
-            result_var = "%" + std::to_string(symbol_num++);
+            string left_result = mul_exp->dumpIR();
+            string right_result = unary_exp->dumpIR();
+            result_var = "%" + to_string(symbol_num++);
             if (op == "*")
-                std::cout << '\t' << result_var << " = mul " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = mul " << left_result <<
+                    ", " << right_result << endl;
             else if (op == "/")
-                std::cout << '\t' << result_var << " = div " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = div " << left_result <<
+                    ", " << right_result << endl;
             else if (op == "%")
-                std::cout << '\t' << result_var << " = mod " << left_result <<
-                    ", " << right_result << std::endl;
+                cout << '\t' << result_var << " = mod " << left_result <<
+                    ", " << right_result << endl;
             else assert(false);
         }
         return result_var;
@@ -800,62 +800,62 @@ class UnaryExpAST : public BaseAST
 {
 public:
     UnaryExpType type;
-    std::string op;
-    std::unique_ptr<BaseAST> exp;
-    std::string ident;
-    std::vector<std::unique_ptr<BaseAST>> params;
+    string op;
+    unique_ptr<BaseAST> exp;
+    string ident;
+    vector<unique_ptr<BaseAST>> params;
     void dump() const override
     {
         if (type == UnaryExpType::func_call)
         {
-            std::cout << ident << "(";
+            cout << ident << "(";
             for (int i = 0; i < params.size(); i++)
             {
                 params[i]->dump();
-                if (i != params.size() - 1)std::cout << ", ";
+                if (i != params.size() - 1)cout << ", ";
             }
             return;
         }
-        if (type == UnaryExpType::unary)std::cout << op;
+        if (type == UnaryExpType::unary)cout << op;
         exp->dump();
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         if (type == UnaryExpType::primary)return exp->dumpIR();
         else if (type == UnaryExpType::unary)
         {
-            std::string result_var = exp->dumpIR();
-            std::string next_var = "%" + std::to_string(symbol_num);
+            string result_var = exp->dumpIR();
+            string next_var = "%" + to_string(symbol_num);
             if (op == "+")return result_var;
-            else if (op == "-")std::cout << '\t' << next_var << " = sub 0, " <<
-                result_var << std::endl;
-            else if (op == "!")std::cout << '\t' << next_var << " = eq " <<
-                result_var << ", 0" << std::endl;
+            else if (op == "-")cout << '\t' << next_var << " = sub 0, " <<
+                result_var << endl;
+            else if (op == "!")cout << '\t' << next_var << " = eq " <<
+                result_var << ", 0" << endl;
             else assert(false);
             symbol_num++;
             return next_var;
         }
         else if (type == UnaryExpType::func_call)
         {
-            std::vector<std::string> param_vars;
+            vector<string> param_vars;
             for (auto&& param : params)
                 param_vars.push_back(param->dumpIR());
             assert(function_table.count(ident));
             assert(function_param_num[ident] == params.size());
-            std::string result_var = "";
+            string result_var = "";
             if (function_ret_type[ident] == "int")
-                result_var = "%" + std::to_string(symbol_num++);
-            std::string name = function_table[ident];
-            std::cout << '\t';
+                result_var = "%" + to_string(symbol_num++);
+            string name = function_table[ident];
+            cout << '\t';
             if (function_ret_type[ident] == "int")
-                std::cout << result_var << " = ";
-            std::cout << "call " << name << "(";
+                cout << result_var << " = ";
+            cout << "call " << name << "(";
             for (int i = 0; i < param_vars.size(); i++)
             {
-                std::cout << param_vars[i];
-                if (i != param_vars.size() - 1)std::cout << ", ";
+                cout << param_vars[i];
+                if (i != param_vars.size() - 1)cout << ", ";
             }
-            std::cout << ")" << std::endl;
+            cout << ")" << endl;
             return result_var;
         }
         else assert(false);
@@ -883,32 +883,32 @@ class PrimaryExpAST : public BaseAST
 {
 public:
     PrimaryExpType type;
-    std::unique_ptr<BaseAST> exp;
-    std::string lval;
+    unique_ptr<BaseAST> exp;
+    string lval;
     int number;
     void dump() const override
     {
         if (type == PrimaryExpType::exp)exp->dump();
-        else if (type == PrimaryExpType::number)std::cout << number;
-        else if (type == PrimaryExpType::lval)std::cout << lval;
+        else if (type == PrimaryExpType::number)cout << number;
+        else if (type == PrimaryExpType::lval)cout << lval;
         else assert(false);
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string result_var = "";
+        string result_var = "";
         if (type == PrimaryExpType::exp)result_var = exp->dumpIR();
         else if (type == PrimaryExpType::number)
-            result_var = std::to_string(number);
+            result_var = to_string(number);
         else if (type == PrimaryExpType::lval)
         {
-            std::variant<int, std::string> value = look_up_symbol_tables(lval);
+            variant<int, string> value = look_up_symbol_tables(lval);
             if (value.index() == 0)
-                result_var = std::to_string(std::get<int>(value));
+                result_var = to_string(get<int>(value));
             else
             {
-                result_var = "%" + std::to_string(symbol_num++);
-                std::cout << '\t' << result_var << " = load " <<
-                    std::get<std::string>(value) << std::endl;
+                result_var = "%" + to_string(symbol_num++);
+                cout << '\t' << result_var << " = load " <<
+                    get<string>(value) << endl;
             }
         }
         else assert(false);
@@ -921,9 +921,9 @@ public:
         else if (type == PrimaryExpType::number)result = number;
         else if (type == PrimaryExpType::lval)
         {
-            std::variant<int, std::string> value = look_up_symbol_tables(lval);
+            variant<int, string> value = look_up_symbol_tables(lval);
             assert(value.index() == 0);
-            result = std::get<int>(value);
+            result = get<int>(value);
         }
         else assert(false);
         return result;
@@ -935,9 +935,9 @@ class DeclAST : public BaseAST
 {
 public:
     DeclType type;
-    std::unique_ptr<BaseAST> decl;
+    unique_ptr<BaseAST> decl;
     void dump() const override { decl->dump(); }
-    std::string dumpIR() const override { return decl->dumpIR(); }
+    string dumpIR() const override { return decl->dumpIR(); }
     int dumpExp() const override { return decl->dumpExp(); }
 };
 
@@ -945,14 +945,14 @@ public:
 class ConstDeclAST : public BaseAST
 {
 public:
-    std::string b_type;
-    std::vector<std::unique_ptr<BaseAST>> const_def_list;
+    string b_type;
+    vector<unique_ptr<BaseAST>> const_def_list;
     void dump() const override
     {
         assert(b_type == "int");
         for (auto&& const_def : const_def_list)const_def->dump();
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         assert(b_type == "int");
         for (auto&& const_def : const_def_list)const_def->dumpIR();
@@ -965,17 +965,17 @@ public:
 class ConstDefAST : public BaseAST
 {
 public:
-    std::string ident;
-    std::unique_ptr<BaseAST> const_init_val;
+    string ident;
+    unique_ptr<BaseAST> const_init_val;
     void dump() const override
     {
-        std::cout << "ConstDefAST{" << ident << "=";
+        cout << "ConstDefAST{" << ident << "=";
         const_init_val->dump();
-        std::cout << "} ";
+        cout << "} ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        symbol_tables.back()[ident] = std::stoi(const_init_val->dumpIR());
+        symbol_tables.back()[ident] = stoi(const_init_val->dumpIR());
         return "";
     }
 };
@@ -984,11 +984,11 @@ public:
 class ConstInitValAST : public BaseAST
 {
 public:
-    std::unique_ptr<BaseAST> const_exp;
-    void dump() const override { std::cout << const_exp->dumpExp(); }
-    std::string dumpIR() const override
+    unique_ptr<BaseAST> const_exp;
+    void dump() const override { cout << const_exp->dumpExp(); }
+    string dumpIR() const override
     {
-        return std::to_string(const_exp->dumpExp());
+        return to_string(const_exp->dumpExp());
     }
 };
 
@@ -997,20 +997,20 @@ class BlockItemAST : public BaseAST
 {
 public:
     BlockItemType type;
-    std::unique_ptr<BaseAST> content;
+    unique_ptr<BaseAST> content;
     void dump() const override { content->dump(); }
-    std::string dumpIR() const override { return content->dumpIR(); }
+    string dumpIR() const override { return content->dumpIR(); }
 };
 
 
 class ConstExpAST : public BaseAST
 {
 public:
-    std::unique_ptr<BaseAST> exp;
-    void dump() const override { std::cout << exp->dumpExp(); }
-    std::string dumpIR() const override
+    unique_ptr<BaseAST> exp;
+    void dump() const override { cout << exp->dumpExp(); }
+    string dumpIR() const override
     {
-        return std::to_string(exp->dumpExp());
+        return to_string(exp->dumpExp());
     }
     virtual int dumpExp() const override { return exp->dumpExp(); }
 };
@@ -1019,14 +1019,14 @@ public:
 class VarDeclAST : public BaseAST
 {
 public:
-    std::string b_type;
-    std::vector<std::unique_ptr<BaseAST>> var_def_list;
+    string b_type;
+    vector<unique_ptr<BaseAST>> var_def_list;
     void dump() const override
     {
         assert(b_type == "int");
         for (auto&& var_def : var_def_list)var_def->dump();
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
         assert(b_type == "int");
         for (auto&& var_def : var_def_list)var_def->dumpIR();
@@ -1044,50 +1044,50 @@ public:
 class VarDefAST : public BaseAST
 {
 public:
-    std::string ident;
+    string ident;
     bool has_init_val;
-    std::unique_ptr<BaseAST> init_val;
+    unique_ptr<BaseAST> init_val;
     void dump() const override
     {
-        std::cout << "VarDefAST{" << ident;
+        cout << "VarDefAST{" << ident;
         if (has_init_val)
         {
-            std::cout << "=";
+            cout << "=";
             init_val->dump();
         }
-        std::cout << "} ";
+        cout << "} ";
     }
-    std::string dumpIR() const override
+    string dumpIR() const override
     {
-        std::string var_name = "@" + ident;
-        std::string name = var_name + "_" +
-            std::to_string(var_num[var_name]++);
-        std::cout << '\t' << name << " = alloc i32" << std::endl;
+        string var_name = "@" + ident;
+        string name = var_name + "_" +
+            to_string(var_num[var_name]++);
+        cout << '\t' << name << " = alloc i32" << endl;
         symbol_tables.back()[ident] = name;
         if (has_init_val)
         {
-            std::string val_var = init_val->dumpIR();
-            std::cout << "\tstore " << val_var << ", " << name << std::endl;
+            string val_var = init_val->dumpIR();
+            cout << "\tstore " << val_var << ", " << name << endl;
         }
         return "";
     }
     int dumpExp() const override
     {
-        std::string var_name = "@" + ident;
-        std::string name = var_name + "_" +
-            std::to_string(var_num[var_name]++);
+        string var_name = "@" + ident;
+        string name = var_name + "_" +
+            to_string(var_num[var_name]++);
         symbol_tables.back()[ident] = name;
         if (has_init_val)
         {
-            std::string val_var = init_val->dumpIR();
-            std::cout << "global " << name << " = alloc i32, ";
+            string val_var = init_val->dumpIR();
+            cout << "global " << name << " = alloc i32, ";
             if (val_var[0] == '@' || val_var[0] == '%')assert(false);
-            else if (val_var != "0")std::cout << val_var << std::endl;
-            else std::cout << "zeroinit" << std::endl;
+            else if (val_var != "0")cout << val_var << endl;
+            else cout << "zeroinit" << endl;
         }
         else
-            std::cout << "global " << name << " = alloc i32, zeroinit" <<
-                std::endl;
+            cout << "global " << name << " = alloc i32, zeroinit" <<
+                endl;
         return 0;
     }
 };
@@ -1096,7 +1096,7 @@ public:
 class InitValAST : public BaseAST
 {
 public:
-    std::unique_ptr<BaseAST> exp;
+    unique_ptr<BaseAST> exp;
     void dump() const override { exp->dump(); }
-    std::string dumpIR() const override { return exp->dumpIR(); }
+    string dumpIR() const override { return exp->dumpIR(); }
 };

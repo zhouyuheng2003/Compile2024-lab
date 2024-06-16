@@ -40,7 +40,7 @@ using namespace std;
 %type <ast_val> SimpleStmt OpenStmt ClosedStmt CompUnitList FuncFParam
 %type <vec_val> BlockItemList ConstDefList VarDefList FuncFParams FuncRParams
 %type <int_val> Number
-%type <str_val> LVal Type
+%type <str_val> LVal BType VoidType
 
 %%
 
@@ -79,14 +79,14 @@ CompUnitList
     ;
 
 FuncDef
-    : Type IDENT '(' ')' Block {
+    : VoidType IDENT '(' ')' Block {
         auto func_def = new FuncDefAST();
         func_def->func_type = *unique_ptr<string>($1);
         func_def->ident = *unique_ptr<string>($2);
         func_def->block = unique_ptr<BaseAST>($5);
         $$ = func_def;
     }
-    | Type IDENT '(' FuncFParams ')' Block {
+    | VoidType IDENT '(' FuncFParams ')' Block {
         auto func_def = new FuncDefAST();
         func_def->func_type = *unique_ptr<string>($1);
         func_def->ident = *unique_ptr<string>($2);
@@ -97,6 +97,25 @@ FuncDef
         ((BlockAST*)(func_def->block).get())->func = func_def->ident;
         $$ = func_def;
     }
+    | BType IDENT '(' ')' Block {
+        auto func_def = new FuncDefAST();
+        func_def->func_type = *unique_ptr<string>($1);
+        func_def->ident = *unique_ptr<string>($2);
+        func_def->block = unique_ptr<BaseAST>($5);
+        $$ = func_def;
+    }
+    | BType IDENT '(' FuncFParams ')' Block {
+        auto func_def = new FuncDefAST();
+        func_def->func_type = *unique_ptr<string>($1);
+        func_def->ident = *unique_ptr<string>($2);
+        vector<unique_ptr<BaseAST>> *v_ptr = ($4);
+        for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
+            func_def->params.push_back(move(*it));
+        func_def->block = unique_ptr<BaseAST>($6);
+        ((BlockAST*)(func_def->block).get())->func = func_def->ident;
+        $$ = func_def;
+    }
+    ;
     ;
 
 FuncFParams
@@ -113,7 +132,7 @@ FuncFParams
     ;
 
 FuncFParam
-    : Type IDENT {
+    : BType IDENT {
         auto param = new FuncFParamAST();
         param->b_type = *unique_ptr<string>($1);
         param->ident = *unique_ptr<string>($2);
@@ -426,7 +445,7 @@ Decl
     ;
 
 ConstDecl
-    : CONST Type ConstDefList ';' {
+    : CONST BType ConstDefList ';' {
         auto const_decl = new ConstDeclAST();
         const_decl->b_type = *unique_ptr<string>($2);
         vector<unique_ptr<BaseAST>> *v_ptr = ($3);
@@ -477,7 +496,7 @@ ConstExp
     ;
 
 VarDecl
-    : Type VarDefList ';' {
+    : BType VarDefList ';' {
         auto var_decl = new VarDeclAST();
         var_decl->b_type = *unique_ptr<string>($1);
         vector<unique_ptr<BaseAST>> *v_ptr = ($2);
@@ -563,16 +582,22 @@ LVal
     }
     ;
 
-Type
+BType
     : INT {
         string *type = new string("int");
         $$ = type;
     }
-    | VOID {
+    // | VOID {
+    //     string *type = new string("void");
+    //     $$ = type;
+    // }
+    ;
+VoidType
+    : VOID {
         string *type = new string("void");
         $$ = type;
     }
-    ;
+
 
 UNARYOP
     : '+' {
