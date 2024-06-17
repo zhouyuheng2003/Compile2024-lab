@@ -33,7 +33,7 @@ using namespace std;
 %token <int_val> INT_CONST
 %token <str_val> LE GE EQ NE AND OR
 
-%type <str_val> UNARYOP MULOP ADDOP RELOP EQOP ANDOP OROP
+%type <str_val> UNARYOP
 %type <ast_val> FuncDef Block Stmt Exp PrimaryExp UnaryExp AddExp
 %type <ast_val> MulExp RelExp EqExp LAndExp LOrExp Decl ConstDecl ConstDef
 %type <ast_val> ConstInitVal BlockItem ConstExp VarDecl VarDef InitVal
@@ -284,10 +284,11 @@ LOrExp
         l_or_exp->l_and_exp = unique_ptr<BaseAST>($1);
         $$ = l_or_exp;
     }
-    | LOrExp OROP LAndExp {
+    | LOrExp OR LAndExp {
         auto l_or_exp = new LOrExpAST();
         l_or_exp->l_or_exp = unique_ptr<BaseAST>($1);
-        l_or_exp->op = *unique_ptr<string>($2);
+
+        l_or_exp->op = *unique_ptr<string>(new string("||"));
         l_or_exp->l_and_exp = unique_ptr<BaseAST>($3);
         $$ = l_or_exp;
     }
@@ -300,10 +301,10 @@ LAndExp
         l_and_exp->eq_exp = unique_ptr<BaseAST>($1);
         $$ = l_and_exp;
     }
-    | LAndExp ANDOP EqExp {
+    | LAndExp AND EqExp {
         auto l_and_exp = new LAndExpAST();
         l_and_exp->l_and_exp = unique_ptr<BaseAST>($1);
-        l_and_exp->op = *unique_ptr<string>($2);
+        l_and_exp->op = *unique_ptr<string>(new string("&&"));
         l_and_exp->eq_exp = unique_ptr<BaseAST>($3);
         $$ = l_and_exp;
     }
@@ -316,10 +317,17 @@ EqExp
         eq_exp->rel_exp = unique_ptr<BaseAST>($1);
         $$ = eq_exp;
     }
-    | EqExp EQOP RelExp {
+    | EqExp EQ RelExp {
         auto eq_exp = new EqExpAST();
         eq_exp->eq_exp = unique_ptr<BaseAST>($1);
-        eq_exp->op = *unique_ptr<string>($2);
+        eq_exp->op = *unique_ptr<string>(new string("=="));
+        eq_exp->rel_exp = unique_ptr<BaseAST>($3);
+        $$ = eq_exp;
+    }
+    | EqExp NE RelExp {
+        auto eq_exp = new EqExpAST();
+        eq_exp->eq_exp = unique_ptr<BaseAST>($1);
+        eq_exp->op = *unique_ptr<string>(new string("!="));
         eq_exp->rel_exp = unique_ptr<BaseAST>($3);
         $$ = eq_exp;
     }
@@ -332,10 +340,31 @@ RelExp
         rel_exp->add_exp = unique_ptr<BaseAST>($1);
         $$ = rel_exp;
     }
-    | RelExp RELOP AddExp {
+    | RelExp LE AddExp {
         auto rel_exp = new RelExpAST();
         rel_exp->rel_exp = unique_ptr<BaseAST>($1);
-        rel_exp->op = *unique_ptr<string>($2);
+        rel_exp->op = *unique_ptr<string>(new string("<="));
+        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        $$ = rel_exp;
+    }
+    | RelExp GE AddExp {
+        auto rel_exp = new RelExpAST();
+        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
+        rel_exp->op = *unique_ptr<string>(new string(">="));
+        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        $$ = rel_exp;
+    }
+    | RelExp '<' AddExp {
+        auto rel_exp = new RelExpAST();
+        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
+        rel_exp->op = *unique_ptr<string>(new string("<"));
+        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        $$ = rel_exp;
+    }
+    | RelExp '>' AddExp {
+        auto rel_exp = new RelExpAST();
+        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
+        rel_exp->op = *unique_ptr<string>(new string(">"));
         rel_exp->add_exp = unique_ptr<BaseAST>($3);
         $$ = rel_exp;
     }
@@ -348,10 +377,17 @@ AddExp
         add_exp->mul_exp = unique_ptr<BaseAST>($1);
         $$ = add_exp;
     }
-    | AddExp ADDOP MulExp {
+    | AddExp '+' MulExp {
         auto add_exp = new AddExpAST();
         add_exp->add_exp = unique_ptr<BaseAST>($1);
-        add_exp->op = *unique_ptr<string>($2);
+        add_exp->op = *unique_ptr<string>(new string("+"));
+        add_exp->mul_exp = unique_ptr<BaseAST>($3);
+        $$ = add_exp;
+    }
+    | AddExp '-' MulExp {
+        auto add_exp = new AddExpAST();
+        add_exp->add_exp = unique_ptr<BaseAST>($1);
+        add_exp->op = *unique_ptr<string>(new string("-"));
         add_exp->mul_exp = unique_ptr<BaseAST>($3);
         $$ = add_exp;
     }
@@ -364,10 +400,24 @@ MulExp
         mul_exp->unary_exp = unique_ptr<BaseAST>($1);
         $$ = mul_exp;
     }
-    | MulExp MULOP UnaryExp {
+    | MulExp '*' UnaryExp {
         auto mul_exp = new MulExpAST();
         mul_exp->mul_exp = unique_ptr<BaseAST>($1);
-        mul_exp->op = *unique_ptr<string>($2);
+        mul_exp->op = *unique_ptr<string>(new string("*"));
+        mul_exp->unary_exp = unique_ptr<BaseAST>($3);
+        $$ = mul_exp;
+    }
+    | MulExp '/' UnaryExp {
+        auto mul_exp = new MulExpAST();
+        mul_exp->mul_exp = unique_ptr<BaseAST>($1);
+        mul_exp->op = *unique_ptr<string>(new string("/"));
+        mul_exp->unary_exp = unique_ptr<BaseAST>($3);
+        $$ = mul_exp;
+    }
+    | MulExp '%' UnaryExp {
+        auto mul_exp = new MulExpAST();
+        mul_exp->mul_exp = unique_ptr<BaseAST>($1);
+        mul_exp->op = *unique_ptr<string>(new string("%"));
         mul_exp->unary_exp = unique_ptr<BaseAST>($3);
         $$ = mul_exp;
     }
@@ -610,75 +660,11 @@ UNARYOP
     }
     ;
 
-MULOP
-    : '*' {
-        string *op = new string("*");
-        $$ = op;
-    }
-    | '/' {
-        string *op = new string("/");
-        $$ = op;
-    }
-    | '%' {
-        string *op = new string("%");
-        $$ = op;
-    }
-    ;
 
-ADDOP
-    : '+' {
-        string *op = new string("+");
-        $$ = op;
-    }
-    | '-' {
-        string *op = new string("-");
-        $$ = op;
-    }
-    ;
 
-RELOP
-    : LE {
-        string *op = new string("<=");
-        $$ = op;
-    }
-    | GE {
-        string *op = new string(">=");
-        $$ = op;
-    }
-    | '<' {
-        string *op = new string("<");
-        $$ = op;
-    }
-    | '>' {
-        string *op = new string(">");
-        $$ = op;
-    }
-    ;
 
-EQOP
-    : EQ {
-        string *op = new string("==");
-        $$ = op;
-    }
-    | NE {
-        string *op = new string("!=");
-        $$ = op;
-    }
-    ;
 
-ANDOP
-    : AND {
-        string *op = new string("&&");
-        $$ = op;
-    }
-    ;
 
-OROP
-    : OR {
-        string *op = new string("||");
-        $$ = op;
-    }
-    ;
 
 %%
 
