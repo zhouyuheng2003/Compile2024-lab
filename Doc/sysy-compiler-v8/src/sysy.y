@@ -37,21 +37,21 @@ using namespace std;
 %type <ast_val> FuncDef Block Stmt Exp PrimaryExp UnaryExp AddExp
 %type <ast_val> MulExp RelExp EqExp LAndExp LOrExp Decl ConstDecl ConstDef
 %type <ast_val> ConstInitVal BlockItem ConstExp VarDecl VarDef InitVal
-%type <ast_val> SimpleStmt OpenStmt ClosedStmt CompUnitList FuncFParam
+%type <ast_val> OpenStmt ClosedStmt CompUnit FuncFParam
 %type <vec_val> BlockItemList ConstDefList VarDefList FuncFParams FuncRParams
 %type <int_val> Number
 %type <str_val> LVal BType VoidType
 
 %%
 
-CompUnit
-    : CompUnitList {
+Start
+    : CompUnit {
         auto comp_unit = unique_ptr<BaseAST>($1);
         ast = move(comp_unit);
     }
     ;
 
-CompUnitList
+CompUnit
     : FuncDef {
         auto comp_unit = new CompUnitAST();
         auto func_def = unique_ptr<BaseAST>($1);
@@ -64,13 +64,13 @@ CompUnitList
         comp_unit->decl_list.push_back(move(decl));
         $$ = comp_unit;
     }
-    | CompUnitList FuncDef {
+    | CompUnit FuncDef {
         auto comp_unit = (CompUnitAST*)($1);
         auto func_def = unique_ptr<BaseAST>($2);
         comp_unit->func_def_list.push_back(move(func_def));
         $$ = comp_unit;
     }
-    | CompUnitList Decl {
+    | CompUnit Decl {
         auto comp_unit = (CompUnitAST*)($1);
         auto decl = unique_ptr<BaseAST>($2);
         comp_unit->decl_list.push_back(move(decl));
@@ -175,12 +175,57 @@ Stmt
     ;
 
 ClosedStmt
-    : SimpleStmt {
+    : 
+    //////////////////////////////////////////////////////////////////////
+    RETURN Exp ';' {
         auto stmt = new StmtAST();
-        stmt->type = StmtType::simple;
-        stmt->exp_simple = unique_ptr<BaseAST>($1);
+        stmt->type = StmtType::ret;
+        stmt->block_exp = unique_ptr<BaseAST>($2);
         $$ = stmt;
     }
+    | RETURN ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::ret;
+        stmt->block_exp = nullptr;
+        $$ = stmt;
+    }
+    | LVal '=' Exp ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::lval;
+        stmt->lval = *unique_ptr<string>($1);
+        stmt->block_exp = unique_ptr<BaseAST>($3);
+        $$ = stmt;
+    }
+    | Block {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::block;
+        stmt->block_exp = unique_ptr<BaseAST>($1);
+        $$ = stmt;
+    }
+    | Exp ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::exp;
+        stmt->block_exp = unique_ptr<BaseAST>($1);
+        $$ = stmt;
+    }
+    | ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::exp;
+        stmt->block_exp = nullptr;
+        $$ = stmt;
+    }
+    | BREAK ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::break_;
+        $$ = stmt;
+    }
+    | CONTINUE ';' {
+        auto stmt = new StmtAST();
+        stmt->type = StmtType::continue_;
+        $$ = stmt;
+    }
+
+    ///////////////////////////////////////////////////////////////////////
     | IF '(' Exp ')' ClosedStmt ELSE ClosedStmt {
         auto stmt = new StmtAST();
         stmt->type = StmtType::ifelse;
@@ -223,55 +268,6 @@ OpenStmt
     }
     ;
 
-SimpleStmt
-    : RETURN Exp ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::ret;
-        stmt->block_exp = unique_ptr<BaseAST>($2);
-        $$ = stmt;
-    }
-    | RETURN ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::ret;
-        stmt->block_exp = nullptr;
-        $$ = stmt;
-    }
-    | LVal '=' Exp ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::lval;
-        stmt->lval = *unique_ptr<string>($1);
-        stmt->block_exp = unique_ptr<BaseAST>($3);
-        $$ = stmt;
-    }
-    | Block {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::block;
-        stmt->block_exp = unique_ptr<BaseAST>($1);
-        $$ = stmt;
-    }
-    | Exp ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::exp;
-        stmt->block_exp = unique_ptr<BaseAST>($1);
-        $$ = stmt;
-    }
-    | ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::exp;
-        stmt->block_exp = nullptr;
-        $$ = stmt;
-    }
-    | BREAK ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::break_;
-        $$ = stmt;
-    }
-    | CONTINUE ';' {
-        auto stmt = new SimpleStmtAST();
-        stmt->type = SimpleStmtType::continue_;
-        $$ = stmt;
-    }
-    ;
 
 Exp
     : LOrExp {

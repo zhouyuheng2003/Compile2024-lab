@@ -13,8 +13,7 @@ static int if_else_num = 0;
 static int while_num = 0;
 enum class UnaryExpType { primary, unary, func_call };
 enum class PrimaryExpType { exp, number, lval };
-enum class StmtType { if_, ifelse, simple, while_ };
-enum class SimpleStmtType { lval, exp, block, ret, break_, continue_ };
+enum class StmtType { if_, ifelse, simple, while_,lval, exp, block, ret, break_, continue_ };
 enum class DeclType { const_decl, var_decl };
 enum class BlockItemType { decl, stmt };
 static vector<map<string, variant<int, string>>>
@@ -232,14 +231,39 @@ public:
     unique_ptr<BaseAST> if_stmt;
     unique_ptr<BaseAST> else_stmt;
     unique_ptr<BaseAST> while_stmt;
+    string lval;
+    unique_ptr<BaseAST> block_exp;
     void dump() const override
     {
-        if (type == StmtType::simple)
+        if (type == StmtType::ret)
         {
-            cout << "StmtAST { ";
-            exp_simple->dump();
+            cout << "RETURN { ";
+            block_exp->dump();
             cout << " } ";
         }
+        else if (type == StmtType::lval)
+        {
+            cout << "LVAL { " << lval << " = ";
+            block_exp->dump();
+            cout << " } ";
+        }
+        else if (type == StmtType::exp)
+        {
+            if (block_exp != nullptr)
+            {
+                cout << "EXP { ";
+                block_exp->dump();
+                cout << " } ";
+            }
+        }
+        else if (type == StmtType::block)
+        {
+            cout << "BLOCK { ";
+            block_exp->dump();
+            cout << " } ";
+        }
+        else if (type == StmtType::break_)cout << "BREAK ";
+        else if (type == StmtType::continue_)cout << "CONTINUE ";
         else if (type == StmtType::if_)
         {
             cout << "IF { ";
@@ -271,6 +295,50 @@ public:
     string dumpIR() const override
     {
         if (type == StmtType::simple)return exp_simple->dumpIR();
+        if (type == StmtType::ret)
+        {
+            if (block_exp == nullptr)
+            {
+                if (present_func_type == "int")
+                    cout << "\tret 0" << endl;
+                else cout << "\tret" << endl;
+            }
+            else
+            {
+                string result_var = block_exp->dumpIR();
+                cout << "\tret " << result_var << endl;
+            }
+            return "ret";
+        }
+        else if (type == StmtType::lval)
+        {
+            string result_var = block_exp->dumpIR();
+            variant<int, string> value = look_up_symbol_tables(lval);
+            assert(value.index() == 1);
+            cout << "\tstore " << result_var << ", " <<
+                get<string>(value) << endl;
+        }
+        else if (type == StmtType::exp)
+        {
+            if (block_exp != nullptr)block_exp->dumpIR();
+        }
+        else if (type == StmtType::block)return block_exp->dumpIR();
+        else if (type == StmtType::break_)
+        {
+            assert(!while_stack.empty());
+            int while_no = while_stack.back();
+            string end_label = "\%while_end_" + to_string(while_no);
+            cout << "\tjump " << end_label << endl;
+            return "break";
+        }
+        else if (type == StmtType::continue_)
+        {
+            assert(!while_stack.empty());
+            int while_no = while_stack.back();
+            string entry_label = "\%while_" + to_string(while_no);
+            cout << "\tjump " << entry_label << endl;
+            return "cont";
+        }
         else if (type == StmtType::if_)
         {
             string if_result = exp_simple->dumpIR();
@@ -334,95 +402,6 @@ public:
 };
 
 
-class SimpleStmtAST : public BaseAST
-{
-public:
-    SimpleStmtType type;
-    string lval;
-    unique_ptr<BaseAST> block_exp;
-    void dump() const override
-    {
-        if (type == SimpleStmtType::ret)
-        {
-            cout << "RETURN { ";
-            block_exp->dump();
-            cout << " } ";
-        }
-        else if (type == SimpleStmtType::lval)
-        {
-            cout << "LVAL { " << lval << " = ";
-            block_exp->dump();
-            cout << " } ";
-        }
-        else if (type == SimpleStmtType::exp)
-        {
-            if (block_exp != nullptr)
-            {
-                cout << "EXP { ";
-                block_exp->dump();
-                cout << " } ";
-            }
-        }
-        else if (type == SimpleStmtType::block)
-        {
-            cout << "BLOCK { ";
-            block_exp->dump();
-            cout << " } ";
-        }
-        else if (type == SimpleStmtType::break_)cout << "BREAK ";
-        else if (type == SimpleStmtType::continue_)cout << "CONTINUE ";
-        else assert(false);
-    }
-    string dumpIR() const override
-    {
-        if (type == SimpleStmtType::ret)
-        {
-            if (block_exp == nullptr)
-            {
-                if (present_func_type == "int")
-                    cout << "\tret 0" << endl;
-                else cout << "\tret" << endl;
-            }
-            else
-            {
-                string result_var = block_exp->dumpIR();
-                cout << "\tret " << result_var << endl;
-            }
-            return "ret";
-        }
-        else if (type == SimpleStmtType::lval)
-        {
-            string result_var = block_exp->dumpIR();
-            variant<int, string> value = look_up_symbol_tables(lval);
-            assert(value.index() == 1);
-            cout << "\tstore " << result_var << ", " <<
-                get<string>(value) << endl;
-        }
-        else if (type == SimpleStmtType::exp)
-        {
-            if (block_exp != nullptr)block_exp->dumpIR();
-        }
-        else if (type == SimpleStmtType::block)return block_exp->dumpIR();
-        else if (type == SimpleStmtType::break_)
-        {
-            assert(!while_stack.empty());
-            int while_no = while_stack.back();
-            string end_label = "\%while_end_" + to_string(while_no);
-            cout << "\tjump " << end_label << endl;
-            return "break";
-        }
-        else if (type == SimpleStmtType::continue_)
-        {
-            assert(!while_stack.empty());
-            int while_no = while_stack.back();
-            string entry_label = "\%while_" + to_string(while_no);
-            cout << "\tjump " << entry_label << endl;
-            return "cont";
-        }
-        else assert(false);
-        return "";
-    }
-};
 
 
 class ExpAST : public BaseAST
