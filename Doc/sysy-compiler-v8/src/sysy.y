@@ -1,77 +1,90 @@
-%code requires {
-    #include <memory>
+%code requires 
+{
+    #include <iostream>
     #include <string>
+    #include <algorithm>
+    #include <vector>
+    #include <map>
+    #include <set>
+    #include <cmath>
+    #include <cstdlib>
     #include "Nodes.h"
     #include "NodesManager.h"
+    using namespace std;
 }
 
 %{
-
 #include <iostream>
-#include <memory>
 #include <string>
+#include <algorithm>
 #include <vector>
+#include <map>
+#include <set>
+#include <cmath>
+#include <cstdlib>
 #include "Nodes.h"
 #include "NodesManager.h"
-
-int yylex();
-void yyerror(NodesManager &manager, const char *s);
-
 using namespace std;
-
+void yyerror(NodesManager &manager, const char *s);
+int yylex();
 %}
 
-%parse-param { NodesManager &manager }
+%parse-param {NodesManager &manager}
 
-%union {
-    std::string *str_val;
-    int int_val;
-    BaseAST *ast_val;
-    std::vector<BaseAST *> *vec_val;
+%union 
+{
+    string *stringPointer;
+    int integer32;
+    BaseAST *astPointer;
+    vector<BaseAST *> *vectorPointer;
 }
 
+%type <stringPointer> UNARYOP LVal BType VoidType
+%type <astPointer> FuncDef Block Stmt Exp PrimaryExp UnaryExp AddExp MulExp RelExp EqExp LAndExp LOrExp Decl ConstDecl ConstDef ConstInitVal BlockItem ConstExp VarDecl VarDef InitVal OpenStmt ClosedStmt CompUnit FuncFParam
+%type <vectorPointer> BlockItemList ConstDefList VarDefList FuncFParams FuncRParams
+%type <integer32> Number
 %token INT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE
-%token <str_val> IDENT
-%token <int_val> INT_CONST
-%token <str_val> LE GE EQ NE AND OR
+%token <stringPointer> IDENT
+%token <integer32> INT_CONST
+%token <stringPointer> LE GE EQ NE AND OR
 
-%type <str_val> UNARYOP
-%type <ast_val> FuncDef Block Stmt Exp PrimaryExp UnaryExp AddExp
-%type <ast_val> MulExp RelExp EqExp LAndExp LOrExp Decl ConstDecl ConstDef
-%type <ast_val> ConstInitVal BlockItem ConstExp VarDecl VarDef InitVal
-%type <ast_val> OpenStmt ClosedStmt CompUnit FuncFParam
-%type <vec_val> BlockItemList ConstDefList VarDefList FuncFParams FuncRParams
-%type <int_val> Number
-%type <str_val> LVal BType VoidType
 
 %%
 
-Start
-    : CompUnit {
+Start:
+	CompUnit 
+	{
         manager.root = (BaseAST*)($1);
     }
     ;
 
-CompUnit
-    : FuncDef {
+CompUnit:
+	FuncDef 
+	{
         auto comp_unit = manager.create_CompUnitAST();
         auto func_def = $1;
         comp_unit->func_def_list.push_back(func_def);
         $$ = comp_unit;
-    }
-    | Decl {
+    }|
+
+	Decl 
+	{
         auto comp_unit = manager.create_CompUnitAST();
         auto decl = (BaseAST*)($1);
         comp_unit->decl_list.push_back(decl);
         $$ = comp_unit;
-    }
-    | CompUnit FuncDef {
+    }|
+
+	CompUnit FuncDef 
+	{
         auto comp_unit = (CompUnitAST*)($1);
         auto func_def = (BaseAST*)($2);
         comp_unit->func_def_list.push_back(func_def);
         $$ = comp_unit;
-    }
-    | CompUnit Decl {
+    }|
+
+	CompUnit Decl 
+	{
         auto comp_unit = (CompUnitAST*)($1);
         auto decl = (BaseAST*)($2);
         comp_unit->decl_list.push_back(decl);
@@ -79,8 +92,9 @@ CompUnit
     }
     ;
 
-FuncDef
-    : VoidType IDENT '(' ')' Block {
+FuncDef:
+	VoidType IDENT '(' ')' Block 
+	{
         auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
@@ -88,8 +102,10 @@ FuncDef
         delete $2;
         func_def->block = (BaseAST*)($5);
         $$ = func_def;
-    }
-    | VoidType IDENT '(' FuncFParams ')' Block {
+    }|
+
+	VoidType IDENT '(' FuncFParams ')' Block 
+	{
         auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
@@ -101,8 +117,10 @@ FuncDef
         func_def->block = (BaseAST*)($6);
         ((BlockAST*)(func_def->block))->func = func_def->ident;
         $$ = func_def;
-    }
-    | BType IDENT '(' ')' Block {
+    }|
+
+	BType IDENT '(' ')' Block 
+	{
         auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
@@ -110,8 +128,10 @@ FuncDef
         delete $2;
         func_def->block = (BaseAST*)($5);
         $$ = func_def;
-    }
-    | BType IDENT '(' FuncFParams ')' Block {
+    }|
+
+	BType IDENT '(' FuncFParams ')' Block 
+	{
         auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
@@ -127,21 +147,25 @@ FuncDef
     ;
     ;
 
-FuncFParams
-    : FuncFParam {
+FuncFParams:
+	FuncFParam 
+	{
         vector<BaseAST*> *v = manager.create_vector();
         v->push_back((BaseAST*)($1));
         $$ = v;
-    }
-    | FuncFParams ',' FuncFParam {
+    }|
+
+	FuncFParams ',' FuncFParam 
+	{
         vector<BaseAST*> *v = ($1);
         v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
-FuncFParam
-    : BType IDENT {
+FuncFParam:
+	BType IDENT 
+	{
         auto param = manager.create_FuncFParamAST();
         param->b_type = *($1);
         delete $1;
@@ -151,21 +175,25 @@ FuncFParam
     }
     ;
 
-FuncRParams
-    : Exp {
+FuncRParams:
+	Exp 
+	{
         vector<BaseAST*> *v = manager.create_vector();
         v->push_back((BaseAST*)($1));
         $$ = v;
-    }
-    | FuncRParams ',' Exp {
+    }|
+
+	FuncRParams ',' Exp 
+	{
         vector<BaseAST*> *v = ($1);
         v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
-Block
-    : '{' BlockItemList '}' {
+Block:
+	'{' BlockItemList '}' 
+	{
         auto block = manager.create_BlockAST();
         vector<BaseAST*> *v_ptr = ($2);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
@@ -174,79 +202,101 @@ Block
     }
     ;
 
-Stmt
-    : OpenStmt {
+Stmt:
+	OpenStmt 
+	{
         auto stmt = ($1);
         $$ = stmt;
-    }
-    | ClosedStmt {
+    }|
+
+	ClosedStmt 
+	{
         auto stmt = ($1);
         $$ = stmt;
     }
     ;
 
-ClosedStmt
-    : 
+ClosedStmt:
+	
     //////////////////////////////////////////////////////////////////////
-    RETURN Exp ';' {
+    RETURN Exp ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
         stmt->block_exp = (BaseAST*)($2);
         $$ = stmt;
-    }
-    | RETURN ';' {
+    }|
+
+	RETURN ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
         stmt->block_exp = nullptr;
         $$ = stmt;
-    }
-    | LVal '=' Exp ';' {
+    }|
+
+	LVal '=' Exp ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::lval;
         stmt->lval = *($1);
         delete $1;
         stmt->block_exp = (BaseAST*)($3);
         $$ = stmt;
-    }
-    | Block {
+    }|
+
+	Block 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::block;
         stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
-    }
-    | Exp ';' {
+    }|
+
+	Exp ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
         stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
-    }
-    | ';' {
+    }|
+
+	';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
         stmt->block_exp = nullptr;
         $$ = stmt;
-    }
-    | BREAK ';' {
+    }|
+
+	BREAK ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::break_;
         $$ = stmt;
-    }
-    | CONTINUE ';' {
+    }|
+
+	CONTINUE ';' 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::continue_;
         $$ = stmt;
-    }
+    }|
 
     ///////////////////////////////////////////////////////////////////////
-    | IF '(' Exp ')' ClosedStmt ELSE ClosedStmt {
+
+	IF '(' Exp ')' ClosedStmt ELSE ClosedStmt 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         stmt->else_stmt = (BaseAST*)($7);
         $$ = stmt;
-    }
-    | WHILE '(' Exp ')' ClosedStmt {
+    }|
+
+	WHILE '(' Exp ')' ClosedStmt 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
         stmt->exp_simple = (BaseAST*)($3);
@@ -255,23 +305,28 @@ ClosedStmt
     }
     ;
 
-OpenStmt
-    : IF '(' Exp ')' Stmt {
+OpenStmt:
+	IF '(' Exp ')' Stmt 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::if_;
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         $$ = stmt;
-    }
-    | IF '(' Exp ')' ClosedStmt ELSE OpenStmt {
+    }|
+
+	IF '(' Exp ')' ClosedStmt ELSE OpenStmt 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         stmt->else_stmt = (BaseAST*)($7);
         $$ = stmt;
-    }
-    | WHILE '(' Exp ')' OpenStmt {
+    }|
+
+	WHILE '(' Exp ')' OpenStmt 
+	{
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
         stmt->exp_simple = (BaseAST*)($3);
@@ -281,22 +336,26 @@ OpenStmt
     ;
 
 
-Exp
-    : LOrExp {
+Exp:
+	LOrExp 
+	{
         auto exp = manager.create_ExpAST();
         exp->l_or_exp = (BaseAST*)($1);
         $$ = exp;
     }
     ;
 
-LOrExp
-    : LAndExp {
+LOrExp:
+	LAndExp 
+	{
         auto l_or_exp = manager.create_LOrExpAST();
         l_or_exp->op = "";
         l_or_exp->l_and_exp = (BaseAST*)($1);
         $$ = l_or_exp;
-    }
-    | LOrExp OR LAndExp {
+    }|
+
+	LOrExp OR LAndExp 
+	{
         auto l_or_exp = manager.create_LOrExpAST();
         l_or_exp->l_or_exp = (BaseAST*)($1);
 
@@ -306,14 +365,17 @@ LOrExp
     }
     ;
 
-LAndExp
-    : EqExp {
+LAndExp:
+	EqExp 
+	{
         auto l_and_exp = manager.create_LAndExpAST();
         l_and_exp->op = "";
         l_and_exp->eq_exp = (BaseAST*)($1);
         $$ = l_and_exp;
-    }
-    | LAndExp AND EqExp {
+    }|
+
+	LAndExp AND EqExp 
+	{
         auto l_and_exp = manager.create_LAndExpAST();
         l_and_exp->l_and_exp = (BaseAST*)($1);
         l_and_exp->op = "&&";
@@ -322,21 +384,26 @@ LAndExp
     }
     ;
 
-EqExp
-    : RelExp {
+EqExp:
+	RelExp 
+	{
         auto eq_exp = manager.create_EqExpAST();
         eq_exp->op = "";
         eq_exp->rel_exp = (BaseAST*)($1);
         $$ = eq_exp;
-    }
-    | EqExp EQ RelExp {
+    }|
+
+	EqExp EQ RelExp 
+	{
         auto eq_exp = manager.create_EqExpAST();
         eq_exp->eq_exp = (BaseAST*)($1);
         eq_exp->op = "==";
         eq_exp->rel_exp = (BaseAST*)($3);
         $$ = eq_exp;
-    }
-    | EqExp NE RelExp {
+    }|
+
+	EqExp NE RelExp 
+	{
         auto eq_exp = manager.create_EqExpAST();
         eq_exp->eq_exp = (BaseAST*)($1);
         eq_exp->op = "!=";
@@ -345,35 +412,44 @@ EqExp
     }
     ;
 
-RelExp
-    : AddExp {
+RelExp:
+	AddExp 
+	{
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->op = "";
         rel_exp->add_exp = (BaseAST*)($1);
         $$ = rel_exp;
-    }
-    | RelExp LE AddExp {
+    }|
+
+	RelExp LE AddExp 
+	{
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->rel_exp = (BaseAST*)($1);
         rel_exp->op = "<=";
         rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
-    }
-    | RelExp GE AddExp {
+    }|
+
+	RelExp GE AddExp 
+	{
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->rel_exp = (BaseAST*)($1);
         rel_exp->op = ">=";
         rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
-    }
-    | RelExp '<' AddExp {
+    }|
+
+	RelExp '<' AddExp 
+	{
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->rel_exp = (BaseAST*)($1);
         rel_exp->op = "<";
         rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
-    }
-    | RelExp '>' AddExp {
+    }|
+
+	RelExp '>' AddExp 
+	{
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->rel_exp = (BaseAST*)($1);
         rel_exp->op = ">";
@@ -382,21 +458,26 @@ RelExp
     }
     ;
 
-AddExp
-    : MulExp {
+AddExp:
+	MulExp 
+	{
         auto add_exp = manager.create_AddExpAST();
         add_exp->op = "";
         add_exp->mul_exp = (BaseAST*)($1);
         $$ = add_exp;
-    }
-    | AddExp '+' MulExp {
+    }|
+
+	AddExp '+' MulExp 
+	{
         auto add_exp = manager.create_AddExpAST();
         add_exp->add_exp = (BaseAST*)($1);
         add_exp->op = "+";
         add_exp->mul_exp = (BaseAST*)($3);
         $$ = add_exp;
-    }
-    | AddExp '-' MulExp {
+    }|
+
+	AddExp '-' MulExp 
+	{
         auto add_exp = manager.create_AddExpAST();
         add_exp->add_exp = (BaseAST*)($1);
         add_exp->op = "-";
@@ -405,28 +486,35 @@ AddExp
     }
     ;
 
-MulExp
-    : UnaryExp {
+MulExp:
+	UnaryExp 
+	{
         auto mul_exp = manager.create_MulExpAST();
         mul_exp->op = "";
         mul_exp->unary_exp = (BaseAST*)($1);
         $$ = mul_exp;
-    }
-    | MulExp '*' UnaryExp {
+    }|
+
+	MulExp '*' UnaryExp 
+	{
         auto mul_exp = manager.create_MulExpAST();
         mul_exp->mul_exp = (BaseAST*)($1);
         mul_exp->op = "*";
         mul_exp->unary_exp = (BaseAST*)($3);
         $$ = mul_exp;
-    }
-    | MulExp '/' UnaryExp {
+    }|
+
+	MulExp '/' UnaryExp 
+	{
         auto mul_exp = manager.create_MulExpAST();
         mul_exp->mul_exp = (BaseAST*)($1);
         mul_exp->op = "/";
         mul_exp->unary_exp = (BaseAST*)($3);
         $$ = mul_exp;
-    }
-    | MulExp '%' UnaryExp {
+    }|
+
+	MulExp '%' UnaryExp 
+	{
         auto mul_exp = manager.create_MulExpAST();
         mul_exp->mul_exp = (BaseAST*)($1);
         mul_exp->op = "%";
@@ -435,29 +523,36 @@ MulExp
     }
     ;
 
-UnaryExp
-    : PrimaryExp {
+UnaryExp:
+	PrimaryExp 
+	{
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::primary;
         unary_exp->exp = (BaseAST*)($1);
         $$ = unary_exp;
-    }
-    | UNARYOP UnaryExp {
+    }|
+
+	UNARYOP UnaryExp 
+	{
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::unary;
         unary_exp->op = *($1);
         delete $1;
         unary_exp->exp = (BaseAST*)($2);
         $$ = unary_exp;
-    }
-    | IDENT '(' ')' {
+    }|
+
+	IDENT '(' ')' 
+	{
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
         unary_exp->ident = *($1);
         delete $1;
         $$ = unary_exp;
-    }
-    | IDENT '(' FuncRParams ')' {
+    }|
+
+	IDENT '(' FuncRParams ')' 
+	{
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
         unary_exp->ident = *($1);
@@ -469,20 +564,25 @@ UnaryExp
     }
     ;
 
-PrimaryExp
-    : '(' Exp ')' {
+PrimaryExp:
+	'(' Exp ')' 
+	{
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::exp;
         primary_exp->exp = (BaseAST*)($2);
         $$ = primary_exp;
-    }
-    | Number {
+    }|
+
+	Number 
+	{
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::number;
         primary_exp->number = ($1);
         $$ = primary_exp;
-    }
-    | LVal {
+    }|
+
+	LVal 
+	{
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::lval;
         primary_exp->lval = *($1);
@@ -491,14 +591,17 @@ PrimaryExp
     }
     ;
 
-Decl
-    : ConstDecl {
+Decl:
+	ConstDecl 
+	{
         auto decl = manager.create_DeclAST();
         decl->type = DeclType::const_decl;
         decl->decl = (BaseAST*)($1);
         $$ = decl;
-    }
-    | VarDecl {
+    }|
+
+	VarDecl 
+	{
         auto decl = manager.create_DeclAST();
         decl->type = DeclType::var_decl;
         decl->decl = (BaseAST*)($1);
@@ -506,8 +609,9 @@ Decl
     }
     ;
 
-ConstDecl
-    : CONST BType ConstDefList ';' {
+ConstDecl:
+	CONST BType ConstDefList ';' 
+	{
         auto const_decl = manager.create_ConstDeclAST();
         const_decl->b_type = *($2);
         delete $2;
@@ -518,8 +622,9 @@ ConstDecl
     }
     ;
 
-ConstDef
-    : IDENT '=' ConstInitVal {
+ConstDef:
+	IDENT '=' ConstInitVal 
+	{
         auto const_def = manager.create_ConstDefAST();
         const_def->ident = *($1);
         delete $1;
@@ -528,22 +633,26 @@ ConstDef
     }
     ;
 
-ConstInitVal
-    : ConstExp {
+ConstInitVal:
+	ConstExp 
+	{
         auto const_init_val = manager.create_ConstInitValAST();
         const_init_val->const_exp = (BaseAST*)($1);
         $$ = const_init_val;
     }
     ;
 
-BlockItem
-    : Decl {
+BlockItem:
+	Decl 
+	{
         auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::decl;
         block_item->content = (BaseAST*)($1);
         $$ = block_item;
-    }
-    | Stmt {
+    }|
+
+	Stmt 
+	{
         auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::stmt;
         block_item->content = (BaseAST*)($1);
@@ -551,16 +660,18 @@ BlockItem
     }
     ;
 
-ConstExp
-    : Exp {
+ConstExp:
+	Exp 
+	{
         auto const_exp = manager.create_ConstExpAST();
         const_exp->exp = (BaseAST*)($1);
         $$ = const_exp;
     }
     ;
 
-VarDecl
-    : BType VarDefList ';' {
+VarDecl:
+	BType VarDefList ';' 
+	{
         auto var_decl = manager.create_VarDeclAST();
         var_decl->b_type = *($1);
         delete $1;
@@ -571,15 +682,18 @@ VarDecl
     }
     ;
 
-VarDef
-    : IDENT {
+VarDef:
+	IDENT 
+	{
         auto var_def = manager.create_VarDefAST();
         var_def->ident = *($1);
         delete $1;
         var_def->has_init_val = false;
         $$ = var_def;
-    }
-    | IDENT '=' InitVal {
+    }|
+
+	IDENT '=' InitVal 
+	{
         auto var_def = manager.create_VarDefAST();
         var_def->ident = *($1);
         delete $1;
@@ -589,46 +703,56 @@ VarDef
     }
     ;
 
-InitVal
-    : Exp {
+InitVal:
+	Exp 
+	{
         auto init_val = manager.create_InitValAST();
         init_val->exp = (BaseAST*)($1);
         $$ = init_val;
     }
     ;
 
-BlockItemList
-    : {
+BlockItemList:
+	
+	{
         vector<BaseAST*> *v = manager.create_vector();
         $$ = v;
-    }
-    | BlockItemList BlockItem {
+    }|
+
+	BlockItemList BlockItem 
+	{
         vector<BaseAST*> *v = ($1);
         v->push_back((BaseAST*)($2));
         $$ = v;
     }
     ;
 
-ConstDefList
-    : ConstDef {
+ConstDefList:
+	ConstDef 
+	{
         vector<BaseAST*> *v = manager.create_vector();
         v->push_back((BaseAST*)($1));
         $$ = v;
-    }
-    | ConstDefList ',' ConstDef {
+    }|
+
+	ConstDefList ',' ConstDef 
+	{
         vector<BaseAST*> *v = ($1);
         v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
-VarDefList
-    : VarDef {
+VarDefList:
+	VarDef 
+	{
         vector<BaseAST*> *v = manager.create_vector();
         v->push_back((BaseAST*)($1));
         $$ = v;
-    }
-    | VarDefList ',' VarDef {
+    }|
+
+	VarDefList ',' VarDef 
+	{
         vector<BaseAST*> *v = ($1);
         v->push_back((BaseAST*)($3));
         $$ = v;
@@ -636,22 +760,25 @@ VarDefList
     ;
 
 
-Number
-    : INT_CONST {
+Number:
+	INT_CONST 
+	{
         $$ = ($1);
     }
     ;
 
-LVal
-    : IDENT {
+LVal:
+	IDENT 
+	{
         string *lval = new string(*($1));
         delete $1;
         $$ = lval;
     }
     ;
 
-BType
-    : INT {
+BType:
+	INT 
+	{
         string *type = new string("int");
         $$ = type;
     }
@@ -660,23 +787,29 @@ BType
     //     $$ = type;
     // }
     ;
-VoidType
-    : VOID {
+VoidType:
+	VOID 
+	{
         string *type = new string("void");
         $$ = type;
     }
 
 
-UNARYOP
-    : '+' {
+UNARYOP:
+	'+' 
+	{
         string *op = new string("+");
         $$ = op;
-    }
-    | '-' {
+    }|
+
+	'-' 
+	{
         string *op = new string("-");
         $$ = op;
-    }
-    | '!' {
+    }|
+
+	'!' 
+	{
         string *op = new string("!");
         $$ = op;
     }
@@ -691,7 +824,8 @@ UNARYOP
 %%
 
 void yyerror(NodesManager &manager, const char *s)
-{
+
+	{
     extern int yylineno;
     extern char *yytext;
     cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line "

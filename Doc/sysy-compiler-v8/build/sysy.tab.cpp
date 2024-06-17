@@ -66,21 +66,21 @@
 
 
 /* First part of user prologue.  */
-#line 8 "/root/compiler/src/sysy.y"
-
+#line 16 "/root/compiler/src/sysy.y"
 
 #include <iostream>
-#include <memory>
 #include <string>
+#include <algorithm>
 #include <vector>
+#include <map>
+#include <set>
+#include <cmath>
+#include <cstdlib>
 #include "Nodes.h"
 #include "NodesManager.h"
-
-int yylex();
-void yyerror(NodesManager &manager, const char *s);
-
 using namespace std;
-
+void yyerror(NodesManager &manager, const char *s);
+int yylex();
 
 #line 86 "/root/compiler/build/sysy.tab.cpp"
 
@@ -125,14 +125,21 @@ using namespace std;
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 1 "/root/compiler/src/sysy.y"
+#line 2 "/root/compiler/src/sysy.y"
 
-    #include <memory>
+    #include <iostream>
     #include <string>
+    #include <algorithm>
+    #include <vector>
+    #include <map>
+    #include <set>
+    #include <cmath>
+    #include <cstdlib>
     #include "Nodes.h"
     #include "NodesManager.h"
+    using namespace std;
 
-#line 136 "/root/compiler/build/sysy.tab.cpp"
+#line 143 "/root/compiler/build/sysy.tab.cpp"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -163,14 +170,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 26 "/root/compiler/src/sysy.y"
+#line 35 "/root/compiler/src/sysy.y"
 
-    std::string *str_val;
-    int int_val;
-    BaseAST *ast_val;
-    std::vector<BaseAST *> *vec_val;
+    string *stringPointer;
+    int integer32;
+    BaseAST *astPointer;
+    vector<BaseAST *> *vectorPointer;
 
-#line 174 "/root/compiler/build/sysy.tab.cpp"
+#line 181 "/root/compiler/build/sysy.tab.cpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -547,15 +554,15 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    50,    50,    56,    62,    68,    74,    83,    92,   105,
-     114,   131,   136,   144,   155,   160,   168,   178,   182,   191,
-     197,   203,   211,   217,   223,   229,   234,   241,   249,   259,
-     266,   274,   285,   293,   299,   310,   316,   326,   332,   339,
-     349,   355,   362,   369,   376,   386,   392,   399,   409,   415,
-     422,   429,   439,   445,   453,   460,   473,   479,   485,   495,
-     501,   510,   522,   532,   540,   546,   555,   563,   575,   582,
-     593,   601,   605,   613,   618,   626,   631,   640,   646,   654,
-     664,   671,   675,   679
+       0,    55,    55,    62,    70,    78,    86,    96,   107,   122,
+     133,   151,   158,   167,   179,   186,   195,   206,   212,   222,
+     230,   238,   248,   256,   264,   272,   279,   288,   298,   309,
+     318,   328,   340,   349,   357,   369,   377,   388,   396,   405,
+     416,   424,   433,   442,   451,   462,   470,   479,   490,   498,
+     507,   516,   527,   535,   545,   554,   568,   576,   584,   595,
+     603,   613,   626,   637,   646,   654,   664,   673,   686,   695,
+     707,   717,   722,   731,   738,   747,   754,   764,   771,   780,
+     791,   799,   805,   811
 };
 #endif
 
@@ -1448,935 +1455,935 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 50 "/root/compiler/src/sysy.y"
-               {
-        manager.root = (BaseAST*)((yyvsp[0].ast_val));
+#line 56 "/root/compiler/src/sysy.y"
+        {
+        manager.root = (BaseAST*)((yyvsp[0].astPointer));
     }
-#line 1456 "/root/compiler/build/sysy.tab.cpp"
+#line 1463 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 3:
-#line 56 "/root/compiler/src/sysy.y"
-              {
+#line 63 "/root/compiler/src/sysy.y"
+        {
         auto comp_unit = manager.create_CompUnitAST();
-        auto func_def = (yyvsp[0].ast_val);
+        auto func_def = (yyvsp[0].astPointer);
         comp_unit->func_def_list.push_back(func_def);
-        (yyval.ast_val) = comp_unit;
+        (yyval.astPointer) = comp_unit;
     }
-#line 1467 "/root/compiler/build/sysy.tab.cpp"
+#line 1474 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 4:
-#line 62 "/root/compiler/src/sysy.y"
-           {
+#line 71 "/root/compiler/src/sysy.y"
+        {
         auto comp_unit = manager.create_CompUnitAST();
-        auto decl = (BaseAST*)((yyvsp[0].ast_val));
+        auto decl = (BaseAST*)((yyvsp[0].astPointer));
         comp_unit->decl_list.push_back(decl);
-        (yyval.ast_val) = comp_unit;
+        (yyval.astPointer) = comp_unit;
     }
-#line 1478 "/root/compiler/build/sysy.tab.cpp"
+#line 1485 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 5:
-#line 68 "/root/compiler/src/sysy.y"
-                       {
-        auto comp_unit = (CompUnitAST*)((yyvsp[-1].ast_val));
-        auto func_def = (BaseAST*)((yyvsp[0].ast_val));
+#line 79 "/root/compiler/src/sysy.y"
+        {
+        auto comp_unit = (CompUnitAST*)((yyvsp[-1].astPointer));
+        auto func_def = (BaseAST*)((yyvsp[0].astPointer));
         comp_unit->func_def_list.push_back(func_def);
-        (yyval.ast_val) = comp_unit;
+        (yyval.astPointer) = comp_unit;
     }
-#line 1489 "/root/compiler/build/sysy.tab.cpp"
+#line 1496 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 6:
-#line 74 "/root/compiler/src/sysy.y"
-                    {
-        auto comp_unit = (CompUnitAST*)((yyvsp[-1].ast_val));
-        auto decl = (BaseAST*)((yyvsp[0].ast_val));
+#line 87 "/root/compiler/src/sysy.y"
+        {
+        auto comp_unit = (CompUnitAST*)((yyvsp[-1].astPointer));
+        auto decl = (BaseAST*)((yyvsp[0].astPointer));
         comp_unit->decl_list.push_back(decl);
-        (yyval.ast_val) = comp_unit;
+        (yyval.astPointer) = comp_unit;
     }
-#line 1500 "/root/compiler/build/sysy.tab.cpp"
+#line 1507 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 7:
-#line 83 "/root/compiler/src/sysy.y"
-                                   {
+#line 97 "/root/compiler/src/sysy.y"
+        {
         auto func_def = manager.create_FuncDefAST();
-        func_def->func_type = *((yyvsp[-4].str_val));
-        delete (yyvsp[-4].str_val);
-        func_def->ident = *((yyvsp[-3].str_val));
-        delete (yyvsp[-3].str_val);
-        func_def->block = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = func_def;
+        func_def->func_type = *((yyvsp[-4].stringPointer));
+        delete (yyvsp[-4].stringPointer);
+        func_def->ident = *((yyvsp[-3].stringPointer));
+        delete (yyvsp[-3].stringPointer);
+        func_def->block = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = func_def;
     }
-#line 1514 "/root/compiler/build/sysy.tab.cpp"
+#line 1521 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 8:
-#line 92 "/root/compiler/src/sysy.y"
-                                               {
+#line 108 "/root/compiler/src/sysy.y"
+        {
         auto func_def = manager.create_FuncDefAST();
-        func_def->func_type = *((yyvsp[-5].str_val));
-        delete (yyvsp[-5].str_val);
-        func_def->ident = *((yyvsp[-4].str_val));
-        delete (yyvsp[-4].str_val);
-        vector<BaseAST*> *v_ptr = ((yyvsp[-2].vec_val));
+        func_def->func_type = *((yyvsp[-5].stringPointer));
+        delete (yyvsp[-5].stringPointer);
+        func_def->ident = *((yyvsp[-4].stringPointer));
+        delete (yyvsp[-4].stringPointer);
+        vector<BaseAST*> *v_ptr = ((yyvsp[-2].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             func_def->params.push_back(*it);
-        func_def->block = (BaseAST*)((yyvsp[0].ast_val));
+        func_def->block = (BaseAST*)((yyvsp[0].astPointer));
         ((BlockAST*)(func_def->block))->func = func_def->ident;
-        (yyval.ast_val) = func_def;
+        (yyval.astPointer) = func_def;
     }
-#line 1532 "/root/compiler/build/sysy.tab.cpp"
+#line 1539 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 9:
-#line 105 "/root/compiler/src/sysy.y"
-                                {
+#line 123 "/root/compiler/src/sysy.y"
+        {
         auto func_def = manager.create_FuncDefAST();
-        func_def->func_type = *((yyvsp[-4].str_val));
-        delete (yyvsp[-4].str_val);
-        func_def->ident = *((yyvsp[-3].str_val));
-        delete (yyvsp[-3].str_val);
-        func_def->block = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = func_def;
+        func_def->func_type = *((yyvsp[-4].stringPointer));
+        delete (yyvsp[-4].stringPointer);
+        func_def->ident = *((yyvsp[-3].stringPointer));
+        delete (yyvsp[-3].stringPointer);
+        func_def->block = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = func_def;
     }
-#line 1546 "/root/compiler/build/sysy.tab.cpp"
+#line 1553 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 10:
-#line 114 "/root/compiler/src/sysy.y"
-                                            {
+#line 134 "/root/compiler/src/sysy.y"
+        {
         auto func_def = manager.create_FuncDefAST();
-        func_def->func_type = *((yyvsp[-5].str_val));
-        delete (yyvsp[-5].str_val);
-        func_def->ident = *((yyvsp[-4].str_val));
-        delete (yyvsp[-4].str_val);
-        vector<BaseAST*> *v_ptr = ((yyvsp[-2].vec_val));
+        func_def->func_type = *((yyvsp[-5].stringPointer));
+        delete (yyvsp[-5].stringPointer);
+        func_def->ident = *((yyvsp[-4].stringPointer));
+        delete (yyvsp[-4].stringPointer);
+        vector<BaseAST*> *v_ptr = ((yyvsp[-2].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             func_def->params.push_back(*it);
-        func_def->block = (BaseAST*)((yyvsp[0].ast_val));
+        func_def->block = (BaseAST*)((yyvsp[0].astPointer));
         ((BlockAST*)(func_def->block))->func = func_def->ident;
-        (yyval.ast_val) = func_def;
+        (yyval.astPointer) = func_def;
     }
-#line 1564 "/root/compiler/build/sysy.tab.cpp"
+#line 1571 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 11:
-#line 131 "/root/compiler/src/sysy.y"
-                 {
+#line 152 "/root/compiler/src/sysy.y"
+        {
         vector<BaseAST*> *v = manager.create_vector();
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 1574 "/root/compiler/build/sysy.tab.cpp"
+#line 1581 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 12:
-#line 136 "/root/compiler/src/sysy.y"
-                                 {
-        vector<BaseAST*> *v = ((yyvsp[-2].vec_val));
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+#line 159 "/root/compiler/src/sysy.y"
+        {
+        vector<BaseAST*> *v = ((yyvsp[-2].vectorPointer));
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 1584 "/root/compiler/build/sysy.tab.cpp"
+#line 1591 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 13:
-#line 144 "/root/compiler/src/sysy.y"
-                  {
+#line 168 "/root/compiler/src/sysy.y"
+        {
         auto param = manager.create_FuncFParamAST();
-        param->b_type = *((yyvsp[-1].str_val));
-        delete (yyvsp[-1].str_val);
-        param->ident = *((yyvsp[0].str_val));
-        delete (yyvsp[0].str_val);
-        (yyval.ast_val) = param;
+        param->b_type = *((yyvsp[-1].stringPointer));
+        delete (yyvsp[-1].stringPointer);
+        param->ident = *((yyvsp[0].stringPointer));
+        delete (yyvsp[0].stringPointer);
+        (yyval.astPointer) = param;
     }
-#line 1597 "/root/compiler/build/sysy.tab.cpp"
+#line 1604 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 14:
-#line 155 "/root/compiler/src/sysy.y"
-          {
+#line 180 "/root/compiler/src/sysy.y"
+        {
         vector<BaseAST*> *v = manager.create_vector();
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 1607 "/root/compiler/build/sysy.tab.cpp"
+#line 1614 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 15:
-#line 160 "/root/compiler/src/sysy.y"
-                          {
-        vector<BaseAST*> *v = ((yyvsp[-2].vec_val));
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+#line 187 "/root/compiler/src/sysy.y"
+        {
+        vector<BaseAST*> *v = ((yyvsp[-2].vectorPointer));
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 1617 "/root/compiler/build/sysy.tab.cpp"
+#line 1624 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 16:
-#line 168 "/root/compiler/src/sysy.y"
-                            {
+#line 196 "/root/compiler/src/sysy.y"
+        {
         auto block = manager.create_BlockAST();
-        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vec_val));
+        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             block->block_item_list.push_back(*it);
-        (yyval.ast_val) = block;
+        (yyval.astPointer) = block;
     }
-#line 1629 "/root/compiler/build/sysy.tab.cpp"
+#line 1636 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 17:
-#line 178 "/root/compiler/src/sysy.y"
-               {
-        auto stmt = ((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+#line 207 "/root/compiler/src/sysy.y"
+        {
+        auto stmt = ((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1638 "/root/compiler/build/sysy.tab.cpp"
+#line 1645 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 18:
-#line 182 "/root/compiler/src/sysy.y"
-                 {
-        auto stmt = ((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+#line 213 "/root/compiler/src/sysy.y"
+        {
+        auto stmt = ((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1647 "/root/compiler/build/sysy.tab.cpp"
+#line 1654 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 19:
-#line 191 "/root/compiler/src/sysy.y"
-                   {
+#line 223 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
-        stmt->block_exp = (BaseAST*)((yyvsp[-1].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->block_exp = (BaseAST*)((yyvsp[-1].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1658 "/root/compiler/build/sysy.tab.cpp"
+#line 1665 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 20:
-#line 197 "/root/compiler/src/sysy.y"
-                 {
+#line 231 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
         stmt->block_exp = nullptr;
-        (yyval.ast_val) = stmt;
+        (yyval.astPointer) = stmt;
     }
-#line 1669 "/root/compiler/build/sysy.tab.cpp"
+#line 1676 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 21:
-#line 203 "/root/compiler/src/sysy.y"
-                       {
+#line 239 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::lval;
-        stmt->lval = *((yyvsp[-3].str_val));
-        delete (yyvsp[-3].str_val);
-        stmt->block_exp = (BaseAST*)((yyvsp[-1].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->lval = *((yyvsp[-3].stringPointer));
+        delete (yyvsp[-3].stringPointer);
+        stmt->block_exp = (BaseAST*)((yyvsp[-1].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1682 "/root/compiler/build/sysy.tab.cpp"
+#line 1689 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 22:
-#line 211 "/root/compiler/src/sysy.y"
-            {
+#line 249 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::block;
-        stmt->block_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->block_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1693 "/root/compiler/build/sysy.tab.cpp"
+#line 1700 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 23:
-#line 217 "/root/compiler/src/sysy.y"
-              {
+#line 257 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
-        stmt->block_exp = (BaseAST*)((yyvsp[-1].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->block_exp = (BaseAST*)((yyvsp[-1].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1704 "/root/compiler/build/sysy.tab.cpp"
+#line 1711 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 24:
-#line 223 "/root/compiler/src/sysy.y"
-          {
+#line 265 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
         stmt->block_exp = nullptr;
-        (yyval.ast_val) = stmt;
+        (yyval.astPointer) = stmt;
     }
-#line 1715 "/root/compiler/build/sysy.tab.cpp"
+#line 1722 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 25:
-#line 229 "/root/compiler/src/sysy.y"
-                {
+#line 273 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::break_;
-        (yyval.ast_val) = stmt;
+        (yyval.astPointer) = stmt;
     }
-#line 1725 "/root/compiler/build/sysy.tab.cpp"
+#line 1732 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 26:
-#line 234 "/root/compiler/src/sysy.y"
-                   {
+#line 280 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::continue_;
-        (yyval.ast_val) = stmt;
+        (yyval.astPointer) = stmt;
     }
-#line 1735 "/root/compiler/build/sysy.tab.cpp"
+#line 1742 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 27:
-#line 241 "/root/compiler/src/sysy.y"
-                                                {
+#line 289 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
-        stmt->exp_simple = (BaseAST*)((yyvsp[-4].ast_val));
-        stmt->if_stmt = (BaseAST*)((yyvsp[-2].ast_val));
-        stmt->else_stmt = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->exp_simple = (BaseAST*)((yyvsp[-4].astPointer));
+        stmt->if_stmt = (BaseAST*)((yyvsp[-2].astPointer));
+        stmt->else_stmt = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1748 "/root/compiler/build/sysy.tab.cpp"
+#line 1755 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 28:
-#line 249 "/root/compiler/src/sysy.y"
-                                   {
+#line 299 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
-        stmt->exp_simple = (BaseAST*)((yyvsp[-2].ast_val));
-        stmt->while_stmt = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->exp_simple = (BaseAST*)((yyvsp[-2].astPointer));
+        stmt->while_stmt = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1760 "/root/compiler/build/sysy.tab.cpp"
+#line 1767 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 29:
-#line 259 "/root/compiler/src/sysy.y"
-                          {
+#line 310 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::if_;
-        stmt->exp_simple = (BaseAST*)((yyvsp[-2].ast_val));
-        stmt->if_stmt = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->exp_simple = (BaseAST*)((yyvsp[-2].astPointer));
+        stmt->if_stmt = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1772 "/root/compiler/build/sysy.tab.cpp"
+#line 1779 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 30:
-#line 266 "/root/compiler/src/sysy.y"
-                                              {
+#line 319 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
-        stmt->exp_simple = (BaseAST*)((yyvsp[-4].ast_val));
-        stmt->if_stmt = (BaseAST*)((yyvsp[-2].ast_val));
-        stmt->else_stmt = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->exp_simple = (BaseAST*)((yyvsp[-4].astPointer));
+        stmt->if_stmt = (BaseAST*)((yyvsp[-2].astPointer));
+        stmt->else_stmt = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1785 "/root/compiler/build/sysy.tab.cpp"
+#line 1792 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 31:
-#line 274 "/root/compiler/src/sysy.y"
-                                 {
+#line 329 "/root/compiler/src/sysy.y"
+        {
         auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
-        stmt->exp_simple = (BaseAST*)((yyvsp[-2].ast_val));
-        stmt->while_stmt = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = stmt;
+        stmt->exp_simple = (BaseAST*)((yyvsp[-2].astPointer));
+        stmt->while_stmt = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = stmt;
     }
-#line 1797 "/root/compiler/build/sysy.tab.cpp"
+#line 1804 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 32:
-#line 285 "/root/compiler/src/sysy.y"
-             {
+#line 341 "/root/compiler/src/sysy.y"
+        {
         auto exp = manager.create_ExpAST();
-        exp->l_or_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = exp;
+        exp->l_or_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = exp;
     }
-#line 1807 "/root/compiler/build/sysy.tab.cpp"
+#line 1814 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 33:
-#line 293 "/root/compiler/src/sysy.y"
-              {
+#line 350 "/root/compiler/src/sysy.y"
+        {
         auto l_or_exp = manager.create_LOrExpAST();
         l_or_exp->op = "";
-        l_or_exp->l_and_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = l_or_exp;
+        l_or_exp->l_and_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = l_or_exp;
     }
-#line 1818 "/root/compiler/build/sysy.tab.cpp"
+#line 1825 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 34:
-#line 299 "/root/compiler/src/sysy.y"
-                        {
+#line 358 "/root/compiler/src/sysy.y"
+        {
         auto l_or_exp = manager.create_LOrExpAST();
-        l_or_exp->l_or_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        l_or_exp->l_or_exp = (BaseAST*)((yyvsp[-2].astPointer));
 
         l_or_exp->op = "||";
-        l_or_exp->l_and_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = l_or_exp;
+        l_or_exp->l_and_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = l_or_exp;
     }
-#line 1831 "/root/compiler/build/sysy.tab.cpp"
+#line 1838 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 35:
-#line 310 "/root/compiler/src/sysy.y"
-            {
+#line 370 "/root/compiler/src/sysy.y"
+        {
         auto l_and_exp = manager.create_LAndExpAST();
         l_and_exp->op = "";
-        l_and_exp->eq_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = l_and_exp;
+        l_and_exp->eq_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = l_and_exp;
     }
-#line 1842 "/root/compiler/build/sysy.tab.cpp"
+#line 1849 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 36:
-#line 316 "/root/compiler/src/sysy.y"
-                        {
+#line 378 "/root/compiler/src/sysy.y"
+        {
         auto l_and_exp = manager.create_LAndExpAST();
-        l_and_exp->l_and_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        l_and_exp->l_and_exp = (BaseAST*)((yyvsp[-2].astPointer));
         l_and_exp->op = "&&";
-        l_and_exp->eq_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = l_and_exp;
+        l_and_exp->eq_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = l_and_exp;
     }
-#line 1854 "/root/compiler/build/sysy.tab.cpp"
+#line 1861 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 37:
-#line 326 "/root/compiler/src/sysy.y"
-             {
+#line 389 "/root/compiler/src/sysy.y"
+        {
         auto eq_exp = manager.create_EqExpAST();
         eq_exp->op = "";
-        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = eq_exp;
+        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = eq_exp;
     }
-#line 1865 "/root/compiler/build/sysy.tab.cpp"
+#line 1872 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 38:
-#line 332 "/root/compiler/src/sysy.y"
-                      {
+#line 397 "/root/compiler/src/sysy.y"
+        {
         auto eq_exp = manager.create_EqExpAST();
-        eq_exp->eq_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        eq_exp->eq_exp = (BaseAST*)((yyvsp[-2].astPointer));
         eq_exp->op = "==";
-        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = eq_exp;
+        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = eq_exp;
     }
-#line 1877 "/root/compiler/build/sysy.tab.cpp"
+#line 1884 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 39:
-#line 339 "/root/compiler/src/sysy.y"
-                      {
+#line 406 "/root/compiler/src/sysy.y"
+        {
         auto eq_exp = manager.create_EqExpAST();
-        eq_exp->eq_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        eq_exp->eq_exp = (BaseAST*)((yyvsp[-2].astPointer));
         eq_exp->op = "!=";
-        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = eq_exp;
+        eq_exp->rel_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = eq_exp;
     }
-#line 1889 "/root/compiler/build/sysy.tab.cpp"
+#line 1896 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 40:
-#line 349 "/root/compiler/src/sysy.y"
-             {
+#line 417 "/root/compiler/src/sysy.y"
+        {
         auto rel_exp = manager.create_RelExpAST();
         rel_exp->op = "";
-        rel_exp->add_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = rel_exp;
+        rel_exp->add_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = rel_exp;
     }
-#line 1900 "/root/compiler/build/sysy.tab.cpp"
+#line 1907 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 41:
-#line 355 "/root/compiler/src/sysy.y"
-                       {
+#line 425 "/root/compiler/src/sysy.y"
+        {
         auto rel_exp = manager.create_RelExpAST();
-        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].astPointer));
         rel_exp->op = "<=";
-        rel_exp->add_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = rel_exp;
+        rel_exp->add_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = rel_exp;
     }
-#line 1912 "/root/compiler/build/sysy.tab.cpp"
+#line 1919 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 42:
-#line 362 "/root/compiler/src/sysy.y"
-                       {
+#line 434 "/root/compiler/src/sysy.y"
+        {
         auto rel_exp = manager.create_RelExpAST();
-        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].astPointer));
         rel_exp->op = ">=";
-        rel_exp->add_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = rel_exp;
+        rel_exp->add_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = rel_exp;
     }
-#line 1924 "/root/compiler/build/sysy.tab.cpp"
+#line 1931 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 43:
-#line 369 "/root/compiler/src/sysy.y"
-                        {
+#line 443 "/root/compiler/src/sysy.y"
+        {
         auto rel_exp = manager.create_RelExpAST();
-        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].astPointer));
         rel_exp->op = "<";
-        rel_exp->add_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = rel_exp;
+        rel_exp->add_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = rel_exp;
     }
-#line 1936 "/root/compiler/build/sysy.tab.cpp"
+#line 1943 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 44:
-#line 376 "/root/compiler/src/sysy.y"
-                        {
+#line 452 "/root/compiler/src/sysy.y"
+        {
         auto rel_exp = manager.create_RelExpAST();
-        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        rel_exp->rel_exp = (BaseAST*)((yyvsp[-2].astPointer));
         rel_exp->op = ">";
-        rel_exp->add_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = rel_exp;
+        rel_exp->add_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = rel_exp;
     }
-#line 1948 "/root/compiler/build/sysy.tab.cpp"
+#line 1955 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 45:
-#line 386 "/root/compiler/src/sysy.y"
-             {
+#line 463 "/root/compiler/src/sysy.y"
+        {
         auto add_exp = manager.create_AddExpAST();
         add_exp->op = "";
-        add_exp->mul_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = add_exp;
+        add_exp->mul_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = add_exp;
     }
-#line 1959 "/root/compiler/build/sysy.tab.cpp"
+#line 1966 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 46:
-#line 392 "/root/compiler/src/sysy.y"
-                        {
+#line 471 "/root/compiler/src/sysy.y"
+        {
         auto add_exp = manager.create_AddExpAST();
-        add_exp->add_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        add_exp->add_exp = (BaseAST*)((yyvsp[-2].astPointer));
         add_exp->op = "+";
-        add_exp->mul_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = add_exp;
+        add_exp->mul_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = add_exp;
     }
-#line 1971 "/root/compiler/build/sysy.tab.cpp"
+#line 1978 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 47:
-#line 399 "/root/compiler/src/sysy.y"
-                        {
+#line 480 "/root/compiler/src/sysy.y"
+        {
         auto add_exp = manager.create_AddExpAST();
-        add_exp->add_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        add_exp->add_exp = (BaseAST*)((yyvsp[-2].astPointer));
         add_exp->op = "-";
-        add_exp->mul_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = add_exp;
+        add_exp->mul_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = add_exp;
     }
-#line 1983 "/root/compiler/build/sysy.tab.cpp"
+#line 1990 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 48:
-#line 409 "/root/compiler/src/sysy.y"
-               {
+#line 491 "/root/compiler/src/sysy.y"
+        {
         auto mul_exp = manager.create_MulExpAST();
         mul_exp->op = "";
-        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = mul_exp;
+        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = mul_exp;
     }
-#line 1994 "/root/compiler/build/sysy.tab.cpp"
+#line 2001 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 49:
-#line 415 "/root/compiler/src/sysy.y"
-                          {
+#line 499 "/root/compiler/src/sysy.y"
+        {
         auto mul_exp = manager.create_MulExpAST();
-        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].astPointer));
         mul_exp->op = "*";
-        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = mul_exp;
+        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = mul_exp;
     }
-#line 2006 "/root/compiler/build/sysy.tab.cpp"
+#line 2013 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 50:
-#line 422 "/root/compiler/src/sysy.y"
-                          {
+#line 508 "/root/compiler/src/sysy.y"
+        {
         auto mul_exp = manager.create_MulExpAST();
-        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].astPointer));
         mul_exp->op = "/";
-        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = mul_exp;
+        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = mul_exp;
     }
-#line 2018 "/root/compiler/build/sysy.tab.cpp"
+#line 2025 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 51:
-#line 429 "/root/compiler/src/sysy.y"
-                          {
+#line 517 "/root/compiler/src/sysy.y"
+        {
         auto mul_exp = manager.create_MulExpAST();
-        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].ast_val));
+        mul_exp->mul_exp = (BaseAST*)((yyvsp[-2].astPointer));
         mul_exp->op = "%";
-        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = mul_exp;
+        mul_exp->unary_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = mul_exp;
     }
-#line 2030 "/root/compiler/build/sysy.tab.cpp"
+#line 2037 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 52:
-#line 439 "/root/compiler/src/sysy.y"
-                 {
+#line 528 "/root/compiler/src/sysy.y"
+        {
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::primary;
-        unary_exp->exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = unary_exp;
+        unary_exp->exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = unary_exp;
     }
-#line 2041 "/root/compiler/build/sysy.tab.cpp"
+#line 2048 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 53:
-#line 445 "/root/compiler/src/sysy.y"
-                       {
+#line 536 "/root/compiler/src/sysy.y"
+        {
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::unary;
-        unary_exp->op = *((yyvsp[-1].str_val));
-        delete (yyvsp[-1].str_val);
-        unary_exp->exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = unary_exp;
+        unary_exp->op = *((yyvsp[-1].stringPointer));
+        delete (yyvsp[-1].stringPointer);
+        unary_exp->exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = unary_exp;
     }
-#line 2054 "/root/compiler/build/sysy.tab.cpp"
+#line 2061 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 54:
-#line 453 "/root/compiler/src/sysy.y"
-                    {
+#line 546 "/root/compiler/src/sysy.y"
+        {
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
-        unary_exp->ident = *((yyvsp[-2].str_val));
-        delete (yyvsp[-2].str_val);
-        (yyval.ast_val) = unary_exp;
+        unary_exp->ident = *((yyvsp[-2].stringPointer));
+        delete (yyvsp[-2].stringPointer);
+        (yyval.astPointer) = unary_exp;
     }
-#line 2066 "/root/compiler/build/sysy.tab.cpp"
+#line 2073 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 55:
-#line 460 "/root/compiler/src/sysy.y"
-                                {
+#line 555 "/root/compiler/src/sysy.y"
+        {
         auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
-        unary_exp->ident = *((yyvsp[-3].str_val));
-        delete (yyvsp[-3].str_val);
-        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vec_val));
+        unary_exp->ident = *((yyvsp[-3].stringPointer));
+        delete (yyvsp[-3].stringPointer);
+        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             unary_exp->params.push_back(*it);
-        (yyval.ast_val) = unary_exp;
+        (yyval.astPointer) = unary_exp;
     }
-#line 2081 "/root/compiler/build/sysy.tab.cpp"
+#line 2088 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 56:
-#line 473 "/root/compiler/src/sysy.y"
-                  {
+#line 569 "/root/compiler/src/sysy.y"
+        {
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::exp;
-        primary_exp->exp = (BaseAST*)((yyvsp[-1].ast_val));
-        (yyval.ast_val) = primary_exp;
+        primary_exp->exp = (BaseAST*)((yyvsp[-1].astPointer));
+        (yyval.astPointer) = primary_exp;
     }
-#line 2092 "/root/compiler/build/sysy.tab.cpp"
+#line 2099 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 57:
-#line 479 "/root/compiler/src/sysy.y"
-             {
+#line 577 "/root/compiler/src/sysy.y"
+        {
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::number;
-        primary_exp->number = ((yyvsp[0].int_val));
-        (yyval.ast_val) = primary_exp;
+        primary_exp->number = ((yyvsp[0].integer32));
+        (yyval.astPointer) = primary_exp;
     }
-#line 2103 "/root/compiler/build/sysy.tab.cpp"
+#line 2110 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 58:
-#line 485 "/root/compiler/src/sysy.y"
-           {
+#line 585 "/root/compiler/src/sysy.y"
+        {
         auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::lval;
-        primary_exp->lval = *((yyvsp[0].str_val));
-        delete (yyvsp[0].str_val);
-        (yyval.ast_val) = primary_exp;
+        primary_exp->lval = *((yyvsp[0].stringPointer));
+        delete (yyvsp[0].stringPointer);
+        (yyval.astPointer) = primary_exp;
     }
-#line 2115 "/root/compiler/build/sysy.tab.cpp"
+#line 2122 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 59:
-#line 495 "/root/compiler/src/sysy.y"
-                {
+#line 596 "/root/compiler/src/sysy.y"
+        {
         auto decl = manager.create_DeclAST();
         decl->type = DeclType::const_decl;
-        decl->decl = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = decl;
+        decl->decl = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = decl;
     }
-#line 2126 "/root/compiler/build/sysy.tab.cpp"
+#line 2133 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 60:
-#line 501 "/root/compiler/src/sysy.y"
-              {
+#line 604 "/root/compiler/src/sysy.y"
+        {
         auto decl = manager.create_DeclAST();
         decl->type = DeclType::var_decl;
-        decl->decl = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = decl;
+        decl->decl = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = decl;
     }
-#line 2137 "/root/compiler/build/sysy.tab.cpp"
+#line 2144 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 61:
-#line 510 "/root/compiler/src/sysy.y"
-                                   {
+#line 614 "/root/compiler/src/sysy.y"
+        {
         auto const_decl = manager.create_ConstDeclAST();
-        const_decl->b_type = *((yyvsp[-2].str_val));
-        delete (yyvsp[-2].str_val);
-        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vec_val));
+        const_decl->b_type = *((yyvsp[-2].stringPointer));
+        delete (yyvsp[-2].stringPointer);
+        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             const_decl->const_def_list.push_back(*it);
-        (yyval.ast_val) = const_decl;
+        (yyval.astPointer) = const_decl;
     }
-#line 2151 "/root/compiler/build/sysy.tab.cpp"
+#line 2158 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 62:
-#line 522 "/root/compiler/src/sysy.y"
-                             {
+#line 627 "/root/compiler/src/sysy.y"
+        {
         auto const_def = manager.create_ConstDefAST();
-        const_def->ident = *((yyvsp[-2].str_val));
-        delete (yyvsp[-2].str_val);
-        const_def->const_init_val = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = const_def;
+        const_def->ident = *((yyvsp[-2].stringPointer));
+        delete (yyvsp[-2].stringPointer);
+        const_def->const_init_val = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = const_def;
     }
-#line 2163 "/root/compiler/build/sysy.tab.cpp"
+#line 2170 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 63:
-#line 532 "/root/compiler/src/sysy.y"
-               {
+#line 638 "/root/compiler/src/sysy.y"
+        {
         auto const_init_val = manager.create_ConstInitValAST();
-        const_init_val->const_exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = const_init_val;
+        const_init_val->const_exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = const_init_val;
     }
-#line 2173 "/root/compiler/build/sysy.tab.cpp"
+#line 2180 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 64:
-#line 540 "/root/compiler/src/sysy.y"
-           {
+#line 647 "/root/compiler/src/sysy.y"
+        {
         auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::decl;
-        block_item->content = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = block_item;
+        block_item->content = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = block_item;
     }
-#line 2184 "/root/compiler/build/sysy.tab.cpp"
+#line 2191 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 65:
-#line 546 "/root/compiler/src/sysy.y"
-           {
+#line 655 "/root/compiler/src/sysy.y"
+        {
         auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::stmt;
-        block_item->content = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = block_item;
+        block_item->content = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = block_item;
     }
-#line 2195 "/root/compiler/build/sysy.tab.cpp"
+#line 2202 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 66:
-#line 555 "/root/compiler/src/sysy.y"
-          {
+#line 665 "/root/compiler/src/sysy.y"
+        {
         auto const_exp = manager.create_ConstExpAST();
-        const_exp->exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = const_exp;
+        const_exp->exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = const_exp;
     }
-#line 2205 "/root/compiler/build/sysy.tab.cpp"
+#line 2212 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 67:
-#line 563 "/root/compiler/src/sysy.y"
-                           {
+#line 674 "/root/compiler/src/sysy.y"
+        {
         auto var_decl = manager.create_VarDeclAST();
-        var_decl->b_type = *((yyvsp[-2].str_val));
-        delete (yyvsp[-2].str_val);
-        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vec_val));
+        var_decl->b_type = *((yyvsp[-2].stringPointer));
+        delete (yyvsp[-2].stringPointer);
+        vector<BaseAST*> *v_ptr = ((yyvsp[-1].vectorPointer));
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
             var_decl->var_def_list.push_back(*it);
-        (yyval.ast_val) = var_decl;
+        (yyval.astPointer) = var_decl;
     }
-#line 2219 "/root/compiler/build/sysy.tab.cpp"
+#line 2226 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 68:
-#line 575 "/root/compiler/src/sysy.y"
-            {
+#line 687 "/root/compiler/src/sysy.y"
+        {
         auto var_def = manager.create_VarDefAST();
-        var_def->ident = *((yyvsp[0].str_val));
-        delete (yyvsp[0].str_val);
+        var_def->ident = *((yyvsp[0].stringPointer));
+        delete (yyvsp[0].stringPointer);
         var_def->has_init_val = false;
-        (yyval.ast_val) = var_def;
+        (yyval.astPointer) = var_def;
     }
-#line 2231 "/root/compiler/build/sysy.tab.cpp"
+#line 2238 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 69:
-#line 582 "/root/compiler/src/sysy.y"
-                        {
+#line 696 "/root/compiler/src/sysy.y"
+        {
         auto var_def = manager.create_VarDefAST();
-        var_def->ident = *((yyvsp[-2].str_val));
-        delete (yyvsp[-2].str_val);
+        var_def->ident = *((yyvsp[-2].stringPointer));
+        delete (yyvsp[-2].stringPointer);
         var_def->has_init_val = true;
-        var_def->init_val = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = var_def;
+        var_def->init_val = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = var_def;
     }
-#line 2244 "/root/compiler/build/sysy.tab.cpp"
+#line 2251 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 70:
-#line 593 "/root/compiler/src/sysy.y"
-          {
+#line 708 "/root/compiler/src/sysy.y"
+        {
         auto init_val = manager.create_InitValAST();
-        init_val->exp = (BaseAST*)((yyvsp[0].ast_val));
-        (yyval.ast_val) = init_val;
+        init_val->exp = (BaseAST*)((yyvsp[0].astPointer));
+        (yyval.astPointer) = init_val;
     }
-#line 2254 "/root/compiler/build/sysy.tab.cpp"
+#line 2261 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 71:
-#line 601 "/root/compiler/src/sysy.y"
-      {
+#line 717 "/root/compiler/src/sysy.y"
+        {
         vector<BaseAST*> *v = manager.create_vector();
-        (yyval.vec_val) = v;
+        (yyval.vectorPointer) = v;
     }
-#line 2263 "/root/compiler/build/sysy.tab.cpp"
+#line 2270 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 72:
-#line 605 "/root/compiler/src/sysy.y"
-                              {
-        vector<BaseAST*> *v = ((yyvsp[-1].vec_val));
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+#line 723 "/root/compiler/src/sysy.y"
+        {
+        vector<BaseAST*> *v = ((yyvsp[-1].vectorPointer));
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 2273 "/root/compiler/build/sysy.tab.cpp"
+#line 2280 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 73:
-#line 613 "/root/compiler/src/sysy.y"
-               {
+#line 732 "/root/compiler/src/sysy.y"
+        {
         vector<BaseAST*> *v = manager.create_vector();
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 2283 "/root/compiler/build/sysy.tab.cpp"
+#line 2290 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 74:
-#line 618 "/root/compiler/src/sysy.y"
-                                {
-        vector<BaseAST*> *v = ((yyvsp[-2].vec_val));
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+#line 739 "/root/compiler/src/sysy.y"
+        {
+        vector<BaseAST*> *v = ((yyvsp[-2].vectorPointer));
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 2293 "/root/compiler/build/sysy.tab.cpp"
+#line 2300 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 75:
-#line 626 "/root/compiler/src/sysy.y"
-             {
+#line 748 "/root/compiler/src/sysy.y"
+        {
         vector<BaseAST*> *v = manager.create_vector();
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 2303 "/root/compiler/build/sysy.tab.cpp"
+#line 2310 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 76:
-#line 631 "/root/compiler/src/sysy.y"
-                            {
-        vector<BaseAST*> *v = ((yyvsp[-2].vec_val));
-        v->push_back((BaseAST*)((yyvsp[0].ast_val)));
-        (yyval.vec_val) = v;
+#line 755 "/root/compiler/src/sysy.y"
+        {
+        vector<BaseAST*> *v = ((yyvsp[-2].vectorPointer));
+        v->push_back((BaseAST*)((yyvsp[0].astPointer)));
+        (yyval.vectorPointer) = v;
     }
-#line 2313 "/root/compiler/build/sysy.tab.cpp"
+#line 2320 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 77:
-#line 640 "/root/compiler/src/sysy.y"
-                {
-        (yyval.int_val) = ((yyvsp[0].int_val));
+#line 765 "/root/compiler/src/sysy.y"
+        {
+        (yyval.integer32) = ((yyvsp[0].integer32));
     }
-#line 2321 "/root/compiler/build/sysy.tab.cpp"
+#line 2328 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 78:
-#line 646 "/root/compiler/src/sysy.y"
-            {
-        string *lval = new string(*((yyvsp[0].str_val)));
-        delete (yyvsp[0].str_val);
-        (yyval.str_val) = lval;
+#line 772 "/root/compiler/src/sysy.y"
+        {
+        string *lval = new string(*((yyvsp[0].stringPointer)));
+        delete (yyvsp[0].stringPointer);
+        (yyval.stringPointer) = lval;
     }
-#line 2331 "/root/compiler/build/sysy.tab.cpp"
+#line 2338 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 79:
-#line 654 "/root/compiler/src/sysy.y"
-          {
+#line 781 "/root/compiler/src/sysy.y"
+        {
         string *type = new string("int");
-        (yyval.str_val) = type;
+        (yyval.stringPointer) = type;
     }
-#line 2340 "/root/compiler/build/sysy.tab.cpp"
+#line 2347 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 80:
-#line 664 "/root/compiler/src/sysy.y"
-           {
+#line 792 "/root/compiler/src/sysy.y"
+        {
         string *type = new string("void");
-        (yyval.str_val) = type;
+        (yyval.stringPointer) = type;
     }
-#line 2349 "/root/compiler/build/sysy.tab.cpp"
+#line 2356 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 81:
-#line 671 "/root/compiler/src/sysy.y"
-          {
+#line 800 "/root/compiler/src/sysy.y"
+        {
         string *op = new string("+");
-        (yyval.str_val) = op;
+        (yyval.stringPointer) = op;
     }
-#line 2358 "/root/compiler/build/sysy.tab.cpp"
+#line 2365 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 82:
-#line 675 "/root/compiler/src/sysy.y"
-          {
+#line 806 "/root/compiler/src/sysy.y"
+        {
         string *op = new string("-");
-        (yyval.str_val) = op;
+        (yyval.stringPointer) = op;
     }
-#line 2367 "/root/compiler/build/sysy.tab.cpp"
+#line 2374 "/root/compiler/build/sysy.tab.cpp"
     break;
 
   case 83:
-#line 679 "/root/compiler/src/sysy.y"
-          {
+#line 812 "/root/compiler/src/sysy.y"
+        {
         string *op = new string("!");
-        (yyval.str_val) = op;
+        (yyval.stringPointer) = op;
     }
-#line 2376 "/root/compiler/build/sysy.tab.cpp"
+#line 2383 "/root/compiler/build/sysy.tab.cpp"
     break;
 
 
-#line 2380 "/root/compiler/build/sysy.tab.cpp"
+#line 2387 "/root/compiler/build/sysy.tab.cpp"
 
       default: break;
     }
@@ -2608,11 +2615,12 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 691 "/root/compiler/src/sysy.y"
+#line 824 "/root/compiler/src/sysy.y"
 
 
 void yyerror(NodesManager &manager, const char *s)
-{
+
+	{
     extern int yylineno;
     extern char *yytext;
     cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line "

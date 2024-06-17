@@ -44,14 +44,21 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 1 "/root/compiler/src/sysy.y"
+#line 2 "/root/compiler/src/sysy.y"
 
-    #include <memory>
+    #include <iostream>
     #include <string>
+    #include <algorithm>
+    #include <vector>
+    #include <map>
+    #include <set>
+    #include <cmath>
+    #include <cstdlib>
     #include "Nodes.h"
     #include "NodesManager.h"
+    using namespace std;
 
-#line 55 "/root/compiler/build/sysy.tab.hpp"
+#line 62 "/root/compiler/build/sysy.tab.hpp"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -82,14 +89,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 26 "/root/compiler/src/sysy.y"
+#line 35 "/root/compiler/src/sysy.y"
 
-    std::string *str_val;
-    int int_val;
-    BaseAST *ast_val;
-    std::vector<BaseAST *> *vec_val;
+    string *stringPointer;
+    int integer32;
+    BaseAST *astPointer;
+    vector<BaseAST *> *vectorPointer;
 
-#line 93 "/root/compiler/build/sysy.tab.hpp"
+#line 100 "/root/compiler/build/sysy.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
