@@ -1,8 +1,8 @@
 %code requires {
     #include <memory>
     #include <string>
-    #include "AST.h"
-    #include "ASTManager.h"
+    #include "Nodes.h"
+    #include "NodesManager.h"
 }
 
 %{
@@ -11,17 +11,17 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "AST.h"
-#include "ASTManager.h"
+#include "Nodes.h"
+#include "NodesManager.h"
 
 int yylex();
-void yyerror(ASTManager &manager, const char *s);
+void yyerror(NodesManager &manager, const char *s);
 
 using namespace std;
 
 %}
 
-%parse-param { ASTManager &manager }
+%parse-param { NodesManager &manager }
 
 %union {
     std::string *str_val;
@@ -690,7 +690,7 @@ UNARYOP
 
 %%
 
-void yyerror(ASTManager &manager, const char *s)
+void yyerror(NodesManager &manager, const char *s)
 {
     extern int yylineno;
     extern char *yytext;

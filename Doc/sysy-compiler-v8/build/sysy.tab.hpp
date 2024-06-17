@@ -48,8 +48,8 @@ extern int yydebug;
 
     #include <memory>
     #include <string>
-    #include "AST.h"
-    #include "ASTManager.h"
+    #include "Nodes.h"
+    #include "NodesManager.h"
 
 #line 55 "/root/compiler/build/sysy.tab.hpp"
 
@@ -100,6 +100,6 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-int yyparse (ASTManager &manager);
+int yyparse (NodesManager &manager);
 
 #endif /* !YY_YY_ROOT_COMPILER_BUILD_SYSY_TAB_HPP_INCLUDED  */

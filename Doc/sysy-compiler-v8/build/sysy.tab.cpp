@@ -73,11 +73,11 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "AST.h"
-#include "ASTManager.h"
+#include "Nodes.h"
+#include "NodesManager.h"
 
 int yylex();
-void yyerror(ASTManager &manager, const char *s);
+void yyerror(NodesManager &manager, const char *s);
 
 using namespace std;
 
@@ -129,8 +129,8 @@ extern int yydebug;
 
     #include <memory>
     #include <string>
-    #include "AST.h"
-    #include "ASTManager.h"
+    #include "Nodes.h"
+    #include "NodesManager.h"
 
 #line 136 "/root/compiler/build/sysy.tab.cpp"
 
@@ -181,7 +181,7 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-int yyparse (ASTManager &manager);
+int yyparse (NodesManager &manager);
 
 #endif /* !YY_YY_ROOT_COMPILER_BUILD_SYSY_TAB_HPP_INCLUDED  */
 
@@ -826,7 +826,7 @@ do {                                                                      \
 `-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, ASTManager &manager)
+yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, NodesManager &manager)
 {
   FILE *yyoutput = yyo;
   YYUSE (yyoutput);
@@ -848,7 +848,7 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, AS
 `---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, ASTManager &manager)
+yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, NodesManager &manager)
 {
   YYFPRINTF (yyo, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
@@ -886,7 +886,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule, ASTManager &manager)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule, NodesManager &manager)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1176,7 +1176,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, ASTManager &manager)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, NodesManager &manager)
 {
   YYUSE (yyvaluep);
   YYUSE (manager);
@@ -1206,7 +1206,7 @@ int yynerrs;
 `----------*/
 
 int
-yyparse (ASTManager &manager)
+yyparse (NodesManager &manager)
 {
     yy_state_fast_t yystate;
     /* Number of tokens to shift before error messages enabled.  */
@@ -2611,7 +2611,7 @@ yyreturn:
 #line 691 "/root/compiler/src/sysy.y"
 
 
-void yyerror(ASTManager &manager, const char *s)
+void yyerror(NodesManager &manager, const char *s)
 {
     extern int yylineno;
     extern char *yytext;

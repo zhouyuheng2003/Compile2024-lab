@@ -2,13 +2,13 @@
 
 #include <string>
 #include <vector>
-#include "AST.h"
+#include "Nodes.h"
 
 
-class ASTManager
+class NodesManager
 {
 public:
-    ASTManager(){}
+    NodesManager(){}
     BaseAST* root;
     vector <BaseAST*> nodes; 
     vector <vector<BaseAST*>*> vectors;

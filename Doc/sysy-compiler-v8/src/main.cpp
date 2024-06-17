@@ -4,18 +4,18 @@
 #include <sstream>
 #include <memory>
 #include <string>
-#include "AST.h"
+#include "Nodes.h"
 #include "RISCV.h"
 #include "koopa.h"
-#include "ASTManager.h"
+#include "NodesManager.h"
 #define _SUB_MODE
 using namespace std;
 
 
 extern FILE *yyin;
 
-auto manager = ASTManager();
-extern int yyparse(ASTManager &);
+auto manager = NodesManager();
+extern int yyparse(NodesManager &);
 
 
 
