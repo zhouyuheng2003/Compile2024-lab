@@ -1,0 +1,53 @@
+CompUnit ::=  CompUnitList
+CompUnitList ::= Decl | FuncDef | CompUnitList Decl | CompUnitList FuncDef
+
+Decl ::= ConstDecl | VarDecl
+ConstDecl ::= CONST Type ConstDefList ';'
+ConstDefList ::= ConstDef | ConstDefList ',' ConstDef
+ConstDef ::= IDENT '=' ConstInitVal     
+ConstInitVal ::= ConstExp   
+ConstExp ::= Exp
+VarDecl ::= Type VarDefList ';'
+VarDef ::= IDENT | IDENT '=' InitVal
+InitVal ::= Exp  xx
+// 这里支支持单个变量的赋值
+
+FuncDef ::= Type IDENT '(' ')' Block | Type IDENT '(' FuncFParams ')' Block 
+FuncFParams := FuncFParams ',' FuncFParam | FuncFParam
+FuncFParam ::= Type IDENT 
+
+Type ::= INT | VOID
+
+
+Block ::= '{' BlockItemList '}'
+BlockItemList ::=   |  BlockItemList BlockItem
+BlockItem ::= : Decl | Stmt
+Stmt ::= OpenStmt | ClosedStmt
+
+ClosedStmt ::= SimpleStmt | IF '(' Exp ')' ClosedStmt ELSE ClosedStmt | | WHILE '(' Exp ')' ClosedStmt
+OpenStmt ::= IF '(' Exp ')' Stmt | IF '(' Exp ')' ClosedStmt ELSE OpenStmt | WHILE '(' Exp ')' OpenStmt
+
+SimpleStmt := LVal '=' Exp ';' | Exp ';' | ';' | Block | BREAK ';' | CONTINUE '; | RETURN Exp ';' | RETURN ';'
+
+
+Exp ::= LOrExp
+LOrExp := LAndExp | LOrExp OROP LAndExp
+LAndExp ::= EqExp | LAndExp ANDOP EqExp
+EqExp ::= RelExp | EqExp EQOP RelExp
+RelExp ::= AddExp | RelExp RELOP AddExp
+AddExp ::= MulExp | AddExp ADDOP MulExp
+MulExp ::= UnaryExp | MulExp MULOP UnaryExp
+UnaryExp ::= PrimaryExp | UNARYOP UnaryExp | IDENT '(' ')' | IDENT '(' FuncRParams ')'
+PrimaryExp ::= '(' Exp ')' | Number | LVal
+LVal ::= IDENT
+FuncRParams ::= Exp | FuncRParams 
+
+
+
+1. FuncType 和 Btype共享一个type ::= int | void
+2. stmt部分不一样
+3. []的实现方式
+
+todo
+1. 删除error
+2. op的处理

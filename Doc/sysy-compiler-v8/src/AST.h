@@ -52,8 +52,8 @@ public:
 class CompUnitAST : public BaseAST
 {
 public:
-    vector<unique_ptr<BaseAST>> func_def_list;
-    vector<unique_ptr<BaseAST>> decl_list;
+    vector<BaseAST*> func_def_list;
+    vector<BaseAST*> decl_list;
     void dump() const override
     {
         cout << "CompUnitAST { ";
@@ -130,8 +130,8 @@ class FuncDefAST : public BaseAST
 public:
     string func_type;
     string ident;
-    vector<unique_ptr<BaseAST>> params;
-    unique_ptr<BaseAST> block;
+    vector<BaseAST*> params;
+    BaseAST* block;
     void dump() const override
     {
         cout << "FuncDefAST { " << func_type << ", " << ident << ", ";
@@ -184,7 +184,7 @@ public:
 class BlockAST : public BaseAST
 {
 public:
-    vector<unique_ptr<BaseAST>> block_item_list;
+    vector<BaseAST*> block_item_list;
     string func = "";
     void dump() const override
     {
@@ -227,12 +227,12 @@ class StmtAST : public BaseAST
 {
 public:
     StmtType type;
-    unique_ptr<BaseAST> exp_simple;
-    unique_ptr<BaseAST> if_stmt;
-    unique_ptr<BaseAST> else_stmt;
-    unique_ptr<BaseAST> while_stmt;
+    BaseAST* exp_simple;
+    BaseAST* if_stmt;
+    BaseAST* else_stmt;
+    BaseAST* while_stmt;
     string lval;
-    unique_ptr<BaseAST> block_exp;
+    BaseAST* block_exp;
     void dump() const override
     {
         if (type == StmtType::ret)
@@ -407,7 +407,7 @@ public:
 class ExpAST : public BaseAST
 {
 public:
-    unique_ptr<BaseAST> l_or_exp;
+    BaseAST* l_or_exp;
     void dump() const override
     {
         cout << "ExpAST { ";
@@ -429,8 +429,8 @@ class LOrExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> l_and_exp;
-    unique_ptr<BaseAST> l_or_exp;
+    BaseAST* l_and_exp;
+    BaseAST* l_or_exp;
     void dump() const override
     {
         if (op == "")l_and_exp->dump();
@@ -494,8 +494,8 @@ class LAndExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> eq_exp;
-    unique_ptr<BaseAST> l_and_exp;
+    BaseAST* eq_exp;
+    BaseAST* l_and_exp;
     void dump() const override
     {
         if (op == "")eq_exp->dump();
@@ -559,8 +559,8 @@ class EqExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> rel_exp;
-    unique_ptr<BaseAST> eq_exp;
+    BaseAST* rel_exp;
+    BaseAST* eq_exp;
     void dump() const override
     {
         if (op == "")rel_exp->dump();
@@ -611,8 +611,8 @@ class RelExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> add_exp;
-    unique_ptr<BaseAST> rel_exp;
+    BaseAST* add_exp;
+    BaseAST* rel_exp;
     void dump() const override
     {
         if (op == "")add_exp->dump();
@@ -671,8 +671,8 @@ class AddExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> mul_exp;
-    unique_ptr<BaseAST> add_exp;
+    BaseAST* mul_exp;
+    BaseAST* add_exp;
     void dump() const override
     {
         if (op == "")mul_exp->dump();
@@ -723,8 +723,8 @@ class MulExpAST : public BaseAST
 {
 public:
     string op;
-    unique_ptr<BaseAST> unary_exp;
-    unique_ptr<BaseAST> mul_exp;
+    BaseAST* unary_exp;
+    BaseAST* mul_exp;
     void dump() const override
     {
         if (op == "")unary_exp->dump();
@@ -780,9 +780,9 @@ class UnaryExpAST : public BaseAST
 public:
     UnaryExpType type;
     string op;
-    unique_ptr<BaseAST> exp;
+    BaseAST* exp;
     string ident;
-    vector<unique_ptr<BaseAST>> params;
+    vector<BaseAST*> params;
     void dump() const override
     {
         if (type == UnaryExpType::func_call)
@@ -862,7 +862,7 @@ class PrimaryExpAST : public BaseAST
 {
 public:
     PrimaryExpType type;
-    unique_ptr<BaseAST> exp;
+    BaseAST* exp;
     string lval;
     int number;
     void dump() const override
@@ -914,7 +914,7 @@ class DeclAST : public BaseAST
 {
 public:
     DeclType type;
-    unique_ptr<BaseAST> decl;
+    BaseAST* decl;
     void dump() const override { decl->dump(); }
     string dumpIR() const override { return decl->dumpIR(); }
     int dumpExp() const override { return decl->dumpExp(); }
@@ -925,7 +925,7 @@ class ConstDeclAST : public BaseAST
 {
 public:
     string b_type;
-    vector<unique_ptr<BaseAST>> const_def_list;
+    vector<BaseAST*> const_def_list;
     void dump() const override
     {
         assert(b_type == "int");
@@ -945,7 +945,7 @@ class ConstDefAST : public BaseAST
 {
 public:
     string ident;
-    unique_ptr<BaseAST> const_init_val;
+    BaseAST* const_init_val;
     void dump() const override
     {
         cout << "ConstDefAST{" << ident << "=";
@@ -963,7 +963,7 @@ public:
 class ConstInitValAST : public BaseAST
 {
 public:
-    unique_ptr<BaseAST> const_exp;
+    BaseAST* const_exp;
     void dump() const override { cout << const_exp->dumpExp(); }
     string dumpIR() const override
     {
@@ -976,7 +976,7 @@ class BlockItemAST : public BaseAST
 {
 public:
     BlockItemType type;
-    unique_ptr<BaseAST> content;
+    BaseAST* content;
     void dump() const override { content->dump(); }
     string dumpIR() const override { return content->dumpIR(); }
 };
@@ -985,7 +985,7 @@ public:
 class ConstExpAST : public BaseAST
 {
 public:
-    unique_ptr<BaseAST> exp;
+    BaseAST* exp;
     void dump() const override { cout << exp->dumpExp(); }
     string dumpIR() const override
     {
@@ -999,7 +999,7 @@ class VarDeclAST : public BaseAST
 {
 public:
     string b_type;
-    vector<unique_ptr<BaseAST>> var_def_list;
+    vector<BaseAST*> var_def_list;
     void dump() const override
     {
         assert(b_type == "int");
@@ -1025,7 +1025,7 @@ class VarDefAST : public BaseAST
 public:
     string ident;
     bool has_init_val;
-    unique_ptr<BaseAST> init_val;
+    BaseAST* init_val;
     void dump() const override
     {
         cout << "VarDefAST{" << ident;
@@ -1075,7 +1075,7 @@ public:
 class InitValAST : public BaseAST
 {
 public:
-    unique_ptr<BaseAST> exp;
+    BaseAST* exp;
     void dump() const override { exp->dump(); }
     string dumpIR() const override { return exp->dumpIR(); }
 };

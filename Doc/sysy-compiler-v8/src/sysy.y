@@ -2,6 +2,7 @@
     #include <memory>
     #include <string>
     #include "AST.h"
+    #include "ASTManager.h"
 }
 
 %{
@@ -11,21 +12,22 @@
 #include <string>
 #include <vector>
 #include "AST.h"
+#include "ASTManager.h"
 
 int yylex();
-void yyerror(std::unique_ptr<BaseAST> &ast, const char *s);
+void yyerror(ASTManager &manager, const char *s);
 
 using namespace std;
 
 %}
 
-%parse-param { std::unique_ptr<BaseAST> &ast }
+%parse-param { ASTManager &manager }
 
 %union {
     std::string *str_val;
     int int_val;
     BaseAST *ast_val;
-    std::vector<std::unique_ptr<BaseAST>> *vec_val;
+    std::vector<BaseAST *> *vec_val;
 }
 
 %token INT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE
@@ -46,81 +48,80 @@ using namespace std;
 
 Start
     : CompUnit {
-        auto comp_unit = unique_ptr<BaseAST>($1);
-        ast = move(comp_unit);
+        manager.root = (BaseAST*)($1);
     }
     ;
 
 CompUnit
     : FuncDef {
-        auto comp_unit = new CompUnitAST();
-        auto func_def = unique_ptr<BaseAST>($1);
-        comp_unit->func_def_list.push_back(move(func_def));
+        auto comp_unit = manager.create_CompUnitAST();
+        auto func_def = $1;
+        comp_unit->func_def_list.push_back(func_def);
         $$ = comp_unit;
     }
     | Decl {
-        auto comp_unit = new CompUnitAST();
-        auto decl = unique_ptr<BaseAST>($1);
-        comp_unit->decl_list.push_back(move(decl));
+        auto comp_unit = manager.create_CompUnitAST();
+        auto decl = (BaseAST*)($1);
+        comp_unit->decl_list.push_back(decl);
         $$ = comp_unit;
     }
     | CompUnit FuncDef {
         auto comp_unit = (CompUnitAST*)($1);
-        auto func_def = unique_ptr<BaseAST>($2);
-        comp_unit->func_def_list.push_back(move(func_def));
+        auto func_def = (BaseAST*)($2);
+        comp_unit->func_def_list.push_back(func_def);
         $$ = comp_unit;
     }
     | CompUnit Decl {
         auto comp_unit = (CompUnitAST*)($1);
-        auto decl = unique_ptr<BaseAST>($2);
-        comp_unit->decl_list.push_back(move(decl));
+        auto decl = (BaseAST*)($2);
+        comp_unit->decl_list.push_back(decl);
         $$ = comp_unit;
     }
     ;
 
 FuncDef
     : VoidType IDENT '(' ')' Block {
-        auto func_def = new FuncDefAST();
+        auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
         func_def->ident = *($2);
         delete $2;
-        func_def->block = unique_ptr<BaseAST>($5);
+        func_def->block = (BaseAST*)($5);
         $$ = func_def;
     }
     | VoidType IDENT '(' FuncFParams ')' Block {
-        auto func_def = new FuncDefAST();
+        auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
         func_def->ident = *($2);
         delete $2;
-        vector<unique_ptr<BaseAST>> *v_ptr = ($4);
+        vector<BaseAST*> *v_ptr = ($4);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            func_def->params.push_back(move(*it));
-        func_def->block = unique_ptr<BaseAST>($6);
-        ((BlockAST*)(func_def->block).get())->func = func_def->ident;
+            func_def->params.push_back(*it);
+        func_def->block = (BaseAST*)($6);
+        ((BlockAST*)(func_def->block))->func = func_def->ident;
         $$ = func_def;
     }
     | BType IDENT '(' ')' Block {
-        auto func_def = new FuncDefAST();
+        auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
         func_def->ident = *($2);
         delete $2;
-        func_def->block = unique_ptr<BaseAST>($5);
+        func_def->block = (BaseAST*)($5);
         $$ = func_def;
     }
     | BType IDENT '(' FuncFParams ')' Block {
-        auto func_def = new FuncDefAST();
+        auto func_def = manager.create_FuncDefAST();
         func_def->func_type = *($1);
         delete $1;
         func_def->ident = *($2);
         delete $2;
-        vector<unique_ptr<BaseAST>> *v_ptr = ($4);
+        vector<BaseAST*> *v_ptr = ($4);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            func_def->params.push_back(move(*it));
-        func_def->block = unique_ptr<BaseAST>($6);
-        ((BlockAST*)(func_def->block).get())->func = func_def->ident;
+            func_def->params.push_back(*it);
+        func_def->block = (BaseAST*)($6);
+        ((BlockAST*)(func_def->block))->func = func_def->ident;
         $$ = func_def;
     }
     ;
@@ -128,20 +129,20 @@ FuncDef
 
 FuncFParams
     : FuncFParam {
-        vector<unique_ptr<BaseAST>> *v = new vector<unique_ptr<BaseAST>>;
-        v->push_back(unique_ptr<BaseAST>($1));
+        vector<BaseAST*> *v = manager.create_vector();
+        v->push_back((BaseAST*)($1));
         $$ = v;
     }
     | FuncFParams ',' FuncFParam {
-        vector<unique_ptr<BaseAST>> *v = ($1);
-        v->push_back(unique_ptr<BaseAST>($3));
+        vector<BaseAST*> *v = ($1);
+        v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
 FuncFParam
     : BType IDENT {
-        auto param = new FuncFParamAST();
+        auto param = manager.create_FuncFParamAST();
         param->b_type = *($1);
         delete $1;
         param->ident = *($2);
@@ -152,23 +153,23 @@ FuncFParam
 
 FuncRParams
     : Exp {
-        vector<unique_ptr<BaseAST>> *v = new vector<unique_ptr<BaseAST>>;
-        v->push_back(unique_ptr<BaseAST>($1));
+        vector<BaseAST*> *v = manager.create_vector();
+        v->push_back((BaseAST*)($1));
         $$ = v;
     }
     | FuncRParams ',' Exp {
-        vector<unique_ptr<BaseAST>> *v = ($1);
-        v->push_back(unique_ptr<BaseAST>($3));
+        vector<BaseAST*> *v = ($1);
+        v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
 Block
     : '{' BlockItemList '}' {
-        auto block = new BlockAST();
-        vector<unique_ptr<BaseAST>> *v_ptr = ($2);
+        auto block = manager.create_BlockAST();
+        vector<BaseAST*> *v_ptr = ($2);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            block->block_item_list.push_back(move(*it));
+            block->block_item_list.push_back(*it);
         $$ = block;
     }
     ;
@@ -188,93 +189,93 @@ ClosedStmt
     : 
     //////////////////////////////////////////////////////////////////////
     RETURN Exp ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
-        stmt->block_exp = unique_ptr<BaseAST>($2);
+        stmt->block_exp = (BaseAST*)($2);
         $$ = stmt;
     }
     | RETURN ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ret;
         stmt->block_exp = nullptr;
         $$ = stmt;
     }
     | LVal '=' Exp ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::lval;
         stmt->lval = *($1);
         delete $1;
-        stmt->block_exp = unique_ptr<BaseAST>($3);
+        stmt->block_exp = (BaseAST*)($3);
         $$ = stmt;
     }
     | Block {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::block;
-        stmt->block_exp = unique_ptr<BaseAST>($1);
+        stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
     }
     | Exp ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
-        stmt->block_exp = unique_ptr<BaseAST>($1);
+        stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
     }
     | ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::exp;
         stmt->block_exp = nullptr;
         $$ = stmt;
     }
     | BREAK ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::break_;
         $$ = stmt;
     }
     | CONTINUE ';' {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::continue_;
         $$ = stmt;
     }
 
     ///////////////////////////////////////////////////////////////////////
     | IF '(' Exp ')' ClosedStmt ELSE ClosedStmt {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
-        stmt->exp_simple = unique_ptr<BaseAST>($3);
-        stmt->if_stmt = unique_ptr<BaseAST>($5);
-        stmt->else_stmt = unique_ptr<BaseAST>($7);
+        stmt->exp_simple = (BaseAST*)($3);
+        stmt->if_stmt = (BaseAST*)($5);
+        stmt->else_stmt = (BaseAST*)($7);
         $$ = stmt;
     }
     | WHILE '(' Exp ')' ClosedStmt {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
-        stmt->exp_simple = unique_ptr<BaseAST>($3);
-        stmt->while_stmt = unique_ptr<BaseAST>($5);
+        stmt->exp_simple = (BaseAST*)($3);
+        stmt->while_stmt = (BaseAST*)($5);
         $$ = stmt;
     }
     ;
 
 OpenStmt
     : IF '(' Exp ')' Stmt {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::if_;
-        stmt->exp_simple = unique_ptr<BaseAST>($3);
-        stmt->if_stmt = unique_ptr<BaseAST>($5);
+        stmt->exp_simple = (BaseAST*)($3);
+        stmt->if_stmt = (BaseAST*)($5);
         $$ = stmt;
     }
     | IF '(' Exp ')' ClosedStmt ELSE OpenStmt {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::ifelse;
-        stmt->exp_simple = unique_ptr<BaseAST>($3);
-        stmt->if_stmt = unique_ptr<BaseAST>($5);
-        stmt->else_stmt = unique_ptr<BaseAST>($7);
+        stmt->exp_simple = (BaseAST*)($3);
+        stmt->if_stmt = (BaseAST*)($5);
+        stmt->else_stmt = (BaseAST*)($7);
         $$ = stmt;
     }
     | WHILE '(' Exp ')' OpenStmt {
-        auto stmt = new StmtAST();
+        auto stmt = manager.create_StmtAST();
         stmt->type = StmtType::while_;
-        stmt->exp_simple = unique_ptr<BaseAST>($3);
-        stmt->while_stmt = unique_ptr<BaseAST>($5);
+        stmt->exp_simple = (BaseAST*)($3);
+        stmt->while_stmt = (BaseAST*)($5);
         $$ = stmt;
     }
     ;
@@ -282,207 +283,207 @@ OpenStmt
 
 Exp
     : LOrExp {
-        auto exp = new ExpAST();
-        exp->l_or_exp = unique_ptr<BaseAST>($1);
+        auto exp = manager.create_ExpAST();
+        exp->l_or_exp = (BaseAST*)($1);
         $$ = exp;
     }
     ;
 
 LOrExp
     : LAndExp {
-        auto l_or_exp = new LOrExpAST();
+        auto l_or_exp = manager.create_LOrExpAST();
         l_or_exp->op = "";
-        l_or_exp->l_and_exp = unique_ptr<BaseAST>($1);
+        l_or_exp->l_and_exp = (BaseAST*)($1);
         $$ = l_or_exp;
     }
     | LOrExp OR LAndExp {
-        auto l_or_exp = new LOrExpAST();
-        l_or_exp->l_or_exp = unique_ptr<BaseAST>($1);
+        auto l_or_exp = manager.create_LOrExpAST();
+        l_or_exp->l_or_exp = (BaseAST*)($1);
 
-        l_or_exp->op = *unique_ptr<string>(new string("||"));
-        l_or_exp->l_and_exp = unique_ptr<BaseAST>($3);
+        l_or_exp->op = "||";
+        l_or_exp->l_and_exp = (BaseAST*)($3);
         $$ = l_or_exp;
     }
     ;
 
 LAndExp
     : EqExp {
-        auto l_and_exp = new LAndExpAST();
+        auto l_and_exp = manager.create_LAndExpAST();
         l_and_exp->op = "";
-        l_and_exp->eq_exp = unique_ptr<BaseAST>($1);
+        l_and_exp->eq_exp = (BaseAST*)($1);
         $$ = l_and_exp;
     }
     | LAndExp AND EqExp {
-        auto l_and_exp = new LAndExpAST();
-        l_and_exp->l_and_exp = unique_ptr<BaseAST>($1);
-        l_and_exp->op = *unique_ptr<string>(new string("&&"));
-        l_and_exp->eq_exp = unique_ptr<BaseAST>($3);
+        auto l_and_exp = manager.create_LAndExpAST();
+        l_and_exp->l_and_exp = (BaseAST*)($1);
+        l_and_exp->op = "&&";
+        l_and_exp->eq_exp = (BaseAST*)($3);
         $$ = l_and_exp;
     }
     ;
 
 EqExp
     : RelExp {
-        auto eq_exp = new EqExpAST();
+        auto eq_exp = manager.create_EqExpAST();
         eq_exp->op = "";
-        eq_exp->rel_exp = unique_ptr<BaseAST>($1);
+        eq_exp->rel_exp = (BaseAST*)($1);
         $$ = eq_exp;
     }
     | EqExp EQ RelExp {
-        auto eq_exp = new EqExpAST();
-        eq_exp->eq_exp = unique_ptr<BaseAST>($1);
-        eq_exp->op = *unique_ptr<string>(new string("=="));
-        eq_exp->rel_exp = unique_ptr<BaseAST>($3);
+        auto eq_exp = manager.create_EqExpAST();
+        eq_exp->eq_exp = (BaseAST*)($1);
+        eq_exp->op = "==";
+        eq_exp->rel_exp = (BaseAST*)($3);
         $$ = eq_exp;
     }
     | EqExp NE RelExp {
-        auto eq_exp = new EqExpAST();
-        eq_exp->eq_exp = unique_ptr<BaseAST>($1);
-        eq_exp->op = *unique_ptr<string>(new string("!="));
-        eq_exp->rel_exp = unique_ptr<BaseAST>($3);
+        auto eq_exp = manager.create_EqExpAST();
+        eq_exp->eq_exp = (BaseAST*)($1);
+        eq_exp->op = "!=";
+        eq_exp->rel_exp = (BaseAST*)($3);
         $$ = eq_exp;
     }
     ;
 
 RelExp
     : AddExp {
-        auto rel_exp = new RelExpAST();
+        auto rel_exp = manager.create_RelExpAST();
         rel_exp->op = "";
-        rel_exp->add_exp = unique_ptr<BaseAST>($1);
+        rel_exp->add_exp = (BaseAST*)($1);
         $$ = rel_exp;
     }
     | RelExp LE AddExp {
-        auto rel_exp = new RelExpAST();
-        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
-        rel_exp->op = *unique_ptr<string>(new string("<="));
-        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        auto rel_exp = manager.create_RelExpAST();
+        rel_exp->rel_exp = (BaseAST*)($1);
+        rel_exp->op = "<=";
+        rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
     }
     | RelExp GE AddExp {
-        auto rel_exp = new RelExpAST();
-        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
-        rel_exp->op = *unique_ptr<string>(new string(">="));
-        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        auto rel_exp = manager.create_RelExpAST();
+        rel_exp->rel_exp = (BaseAST*)($1);
+        rel_exp->op = ">=";
+        rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
     }
     | RelExp '<' AddExp {
-        auto rel_exp = new RelExpAST();
-        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
-        rel_exp->op = *unique_ptr<string>(new string("<"));
-        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        auto rel_exp = manager.create_RelExpAST();
+        rel_exp->rel_exp = (BaseAST*)($1);
+        rel_exp->op = "<";
+        rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
     }
     | RelExp '>' AddExp {
-        auto rel_exp = new RelExpAST();
-        rel_exp->rel_exp = unique_ptr<BaseAST>($1);
-        rel_exp->op = *unique_ptr<string>(new string(">"));
-        rel_exp->add_exp = unique_ptr<BaseAST>($3);
+        auto rel_exp = manager.create_RelExpAST();
+        rel_exp->rel_exp = (BaseAST*)($1);
+        rel_exp->op = ">";
+        rel_exp->add_exp = (BaseAST*)($3);
         $$ = rel_exp;
     }
     ;
 
 AddExp
     : MulExp {
-        auto add_exp = new AddExpAST();
+        auto add_exp = manager.create_AddExpAST();
         add_exp->op = "";
-        add_exp->mul_exp = unique_ptr<BaseAST>($1);
+        add_exp->mul_exp = (BaseAST*)($1);
         $$ = add_exp;
     }
     | AddExp '+' MulExp {
-        auto add_exp = new AddExpAST();
-        add_exp->add_exp = unique_ptr<BaseAST>($1);
-        add_exp->op = *unique_ptr<string>(new string("+"));
-        add_exp->mul_exp = unique_ptr<BaseAST>($3);
+        auto add_exp = manager.create_AddExpAST();
+        add_exp->add_exp = (BaseAST*)($1);
+        add_exp->op = "+";
+        add_exp->mul_exp = (BaseAST*)($3);
         $$ = add_exp;
     }
     | AddExp '-' MulExp {
-        auto add_exp = new AddExpAST();
-        add_exp->add_exp = unique_ptr<BaseAST>($1);
-        add_exp->op = *unique_ptr<string>(new string("-"));
-        add_exp->mul_exp = unique_ptr<BaseAST>($3);
+        auto add_exp = manager.create_AddExpAST();
+        add_exp->add_exp = (BaseAST*)($1);
+        add_exp->op = "-";
+        add_exp->mul_exp = (BaseAST*)($3);
         $$ = add_exp;
     }
     ;
 
 MulExp
     : UnaryExp {
-        auto mul_exp = new MulExpAST();
+        auto mul_exp = manager.create_MulExpAST();
         mul_exp->op = "";
-        mul_exp->unary_exp = unique_ptr<BaseAST>($1);
+        mul_exp->unary_exp = (BaseAST*)($1);
         $$ = mul_exp;
     }
     | MulExp '*' UnaryExp {
-        auto mul_exp = new MulExpAST();
-        mul_exp->mul_exp = unique_ptr<BaseAST>($1);
-        mul_exp->op = *unique_ptr<string>(new string("*"));
-        mul_exp->unary_exp = unique_ptr<BaseAST>($3);
+        auto mul_exp = manager.create_MulExpAST();
+        mul_exp->mul_exp = (BaseAST*)($1);
+        mul_exp->op = "*";
+        mul_exp->unary_exp = (BaseAST*)($3);
         $$ = mul_exp;
     }
     | MulExp '/' UnaryExp {
-        auto mul_exp = new MulExpAST();
-        mul_exp->mul_exp = unique_ptr<BaseAST>($1);
-        mul_exp->op = *unique_ptr<string>(new string("/"));
-        mul_exp->unary_exp = unique_ptr<BaseAST>($3);
+        auto mul_exp = manager.create_MulExpAST();
+        mul_exp->mul_exp = (BaseAST*)($1);
+        mul_exp->op = "/";
+        mul_exp->unary_exp = (BaseAST*)($3);
         $$ = mul_exp;
     }
     | MulExp '%' UnaryExp {
-        auto mul_exp = new MulExpAST();
-        mul_exp->mul_exp = unique_ptr<BaseAST>($1);
-        mul_exp->op = *unique_ptr<string>(new string("%"));
-        mul_exp->unary_exp = unique_ptr<BaseAST>($3);
+        auto mul_exp = manager.create_MulExpAST();
+        mul_exp->mul_exp = (BaseAST*)($1);
+        mul_exp->op = "%";
+        mul_exp->unary_exp = (BaseAST*)($3);
         $$ = mul_exp;
     }
     ;
 
 UnaryExp
     : PrimaryExp {
-        auto unary_exp = new UnaryExpAST();
+        auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::primary;
-        unary_exp->exp = unique_ptr<BaseAST>($1);
+        unary_exp->exp = (BaseAST*)($1);
         $$ = unary_exp;
     }
     | UNARYOP UnaryExp {
-        auto unary_exp = new UnaryExpAST();
+        auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::unary;
         unary_exp->op = *($1);
         delete $1;
-        unary_exp->exp = unique_ptr<BaseAST>($2);
+        unary_exp->exp = (BaseAST*)($2);
         $$ = unary_exp;
     }
     | IDENT '(' ')' {
-        auto unary_exp = new UnaryExpAST();
+        auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
         unary_exp->ident = *($1);
         delete $1;
         $$ = unary_exp;
     }
     | IDENT '(' FuncRParams ')' {
-        auto unary_exp = new UnaryExpAST();
+        auto unary_exp = manager.create_UnaryExpAST();
         unary_exp->type = UnaryExpType::func_call;
         unary_exp->ident = *($1);
         delete $1;
-        vector<unique_ptr<BaseAST>> *v_ptr = ($3);
+        vector<BaseAST*> *v_ptr = ($3);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            unary_exp->params.push_back(move(*it));
+            unary_exp->params.push_back(*it);
         $$ = unary_exp;
     }
     ;
 
 PrimaryExp
     : '(' Exp ')' {
-        auto primary_exp = new PrimaryExpAST();
+        auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::exp;
-        primary_exp->exp = unique_ptr<BaseAST>($2);
+        primary_exp->exp = (BaseAST*)($2);
         $$ = primary_exp;
     }
     | Number {
-        auto primary_exp = new PrimaryExpAST();
+        auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::number;
         primary_exp->number = ($1);
         $$ = primary_exp;
     }
     | LVal {
-        auto primary_exp = new PrimaryExpAST();
+        auto primary_exp = manager.create_PrimaryExpAST();
         primary_exp->type = PrimaryExpType::lval;
         primary_exp->lval = *($1);
         delete $1;
@@ -492,144 +493,144 @@ PrimaryExp
 
 Decl
     : ConstDecl {
-        auto decl = new DeclAST();
+        auto decl = manager.create_DeclAST();
         decl->type = DeclType::const_decl;
-        decl->decl = unique_ptr<BaseAST>($1);
+        decl->decl = (BaseAST*)($1);
         $$ = decl;
     }
     | VarDecl {
-        auto decl = new DeclAST();
+        auto decl = manager.create_DeclAST();
         decl->type = DeclType::var_decl;
-        decl->decl = unique_ptr<BaseAST>($1);
+        decl->decl = (BaseAST*)($1);
         $$ = decl;
     }
     ;
 
 ConstDecl
     : CONST BType ConstDefList ';' {
-        auto const_decl = new ConstDeclAST();
+        auto const_decl = manager.create_ConstDeclAST();
         const_decl->b_type = *($2);
         delete $2;
-        vector<unique_ptr<BaseAST>> *v_ptr = ($3);
+        vector<BaseAST*> *v_ptr = ($3);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            const_decl->const_def_list.push_back(move(*it));
+            const_decl->const_def_list.push_back(*it);
         $$ = const_decl;
     }
     ;
 
 ConstDef
     : IDENT '=' ConstInitVal {
-        auto const_def = new ConstDefAST();
+        auto const_def = manager.create_ConstDefAST();
         const_def->ident = *($1);
         delete $1;
-        const_def->const_init_val = unique_ptr<BaseAST>($3);
+        const_def->const_init_val = (BaseAST*)($3);
         $$ = const_def;
     }
     ;
 
 ConstInitVal
     : ConstExp {
-        auto const_init_val = new ConstInitValAST();
-        const_init_val->const_exp = unique_ptr<BaseAST>($1);
+        auto const_init_val = manager.create_ConstInitValAST();
+        const_init_val->const_exp = (BaseAST*)($1);
         $$ = const_init_val;
     }
     ;
 
 BlockItem
     : Decl {
-        auto block_item = new BlockItemAST();
+        auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::decl;
-        block_item->content = unique_ptr<BaseAST>($1);
+        block_item->content = (BaseAST*)($1);
         $$ = block_item;
     }
     | Stmt {
-        auto block_item = new BlockItemAST();
+        auto block_item = manager.create_BlockItemAST();
         block_item->type = BlockItemType::stmt;
-        block_item->content = unique_ptr<BaseAST>($1);
+        block_item->content = (BaseAST*)($1);
         $$ = block_item;
     }
     ;
 
 ConstExp
     : Exp {
-        auto const_exp = new ConstExpAST();
-        const_exp->exp = unique_ptr<BaseAST>($1);
+        auto const_exp = manager.create_ConstExpAST();
+        const_exp->exp = (BaseAST*)($1);
         $$ = const_exp;
     }
     ;
 
 VarDecl
     : BType VarDefList ';' {
-        auto var_decl = new VarDeclAST();
+        auto var_decl = manager.create_VarDeclAST();
         var_decl->b_type = *($1);
         delete $1;
-        vector<unique_ptr<BaseAST>> *v_ptr = ($2);
+        vector<BaseAST*> *v_ptr = ($2);
         for (auto it = v_ptr->begin(); it != v_ptr->end(); it++)
-            var_decl->var_def_list.push_back(move(*it));
+            var_decl->var_def_list.push_back(*it);
         $$ = var_decl;
     }
     ;
 
 VarDef
     : IDENT {
-        auto var_def = new VarDefAST();
+        auto var_def = manager.create_VarDefAST();
         var_def->ident = *($1);
         delete $1;
         var_def->has_init_val = false;
         $$ = var_def;
     }
     | IDENT '=' InitVal {
-        auto var_def = new VarDefAST();
+        auto var_def = manager.create_VarDefAST();
         var_def->ident = *($1);
         delete $1;
         var_def->has_init_val = true;
-        var_def->init_val = unique_ptr<BaseAST>($3);
+        var_def->init_val = (BaseAST*)($3);
         $$ = var_def;
     }
     ;
 
 InitVal
     : Exp {
-        auto init_val = new InitValAST();
-        init_val->exp = unique_ptr<BaseAST>($1);
+        auto init_val = manager.create_InitValAST();
+        init_val->exp = (BaseAST*)($1);
         $$ = init_val;
     }
     ;
 
 BlockItemList
     : {
-        vector<unique_ptr<BaseAST>> *v = new vector<unique_ptr<BaseAST>>;
+        vector<BaseAST*> *v = manager.create_vector();
         $$ = v;
     }
     | BlockItemList BlockItem {
-        vector<unique_ptr<BaseAST>> *v = ($1);
-        v->push_back(unique_ptr<BaseAST>($2));
+        vector<BaseAST*> *v = ($1);
+        v->push_back((BaseAST*)($2));
         $$ = v;
     }
     ;
 
 ConstDefList
     : ConstDef {
-        vector<unique_ptr<BaseAST>> *v = new vector<unique_ptr<BaseAST>>;
-        v->push_back(unique_ptr<BaseAST>($1));
+        vector<BaseAST*> *v = manager.create_vector();
+        v->push_back((BaseAST*)($1));
         $$ = v;
     }
     | ConstDefList ',' ConstDef {
-        vector<unique_ptr<BaseAST>> *v = ($1);
-        v->push_back(unique_ptr<BaseAST>($3));
+        vector<BaseAST*> *v = ($1);
+        v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
 
 VarDefList
     : VarDef {
-        vector<unique_ptr<BaseAST>> *v = new vector<unique_ptr<BaseAST>>;
-        v->push_back(unique_ptr<BaseAST>($1));
+        vector<BaseAST*> *v = manager.create_vector();
+        v->push_back((BaseAST*)($1));
         $$ = v;
     }
     | VarDefList ',' VarDef {
-        vector<unique_ptr<BaseAST>> *v = ($1);
-        v->push_back(unique_ptr<BaseAST>($3));
+        vector<BaseAST*> *v = ($1);
+        v->push_back((BaseAST*)($3));
         $$ = v;
     }
     ;
@@ -689,7 +690,7 @@ UNARYOP
 
 %%
 
-void yyerror(unique_ptr<BaseAST> &ast, const char *s)
+void yyerror(ASTManager &manager, const char *s)
 {
     extern int yylineno;
     extern char *yytext;

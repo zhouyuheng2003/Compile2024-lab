@@ -4,12 +4,15 @@
 CMakeFiles/compiler.dir/src/main.cpp.o
  /opt/include/koopa.h
  /root/compiler/src/AST.h
+ /root/compiler/src/ASTManager.h
  /root/compiler/src/RISCV.h
  /root/compiler/src/main.cpp
 CMakeFiles/compiler.dir/sysy.lex.cpp.o
  ../src/AST.h
+ ../src/ASTManager.h
  /root/compiler/build/sysy.lex.cpp
  /root/compiler/build/sysy.tab.hpp
 CMakeFiles/compiler.dir/sysy.tab.cpp.o
  ../src/AST.h
+ ../src/ASTManager.h
  /root/compiler/build/sysy.tab.cpp

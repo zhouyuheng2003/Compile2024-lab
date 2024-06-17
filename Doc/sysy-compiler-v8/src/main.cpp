@@ -7,12 +7,17 @@
 #include "AST.h"
 #include "RISCV.h"
 #include "koopa.h"
+#include "ASTManager.h"
 #define _SUB_MODE
 using namespace std;
 
 
 extern FILE *yyin;
-extern int yyparse(unique_ptr<BaseAST> &ast);
+
+auto manager = ASTManager();
+extern int yyparse(ASTManager &);
+
+
 
 
 int main(int argc, const char *argv[])
@@ -28,10 +33,11 @@ int main(int argc, const char *argv[])
     #endif
     assert(yyin);
 
-    unique_ptr<BaseAST> ast;
-    auto ret = yyparse(ast);
+    BaseAST* ast;
+    auto ret = yyparse(manager);
+    ast = manager.root;
     assert(!ret);
-
+    // cerr << "Parsing finished" << endl;
     if (string(mode) == "-koopa")ast->dumpIR();
     else if (string(mode) == "-riscv")
     {
