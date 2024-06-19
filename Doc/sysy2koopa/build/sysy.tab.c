@@ -2244,7 +2244,7 @@ yyreduce:
 #line 596 "sysy.y"
     {
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::const_decl;
+        decl->type = "const_decl";
         decl->decl = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = decl;
     ;}
@@ -2256,7 +2256,7 @@ yyreduce:
 #line 604 "sysy.y"
     {
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::var_decl;
+        decl->type = "var_decl";
         decl->decl = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = decl;
     ;}
@@ -2743,10 +2743,8 @@ yyreturn:
 
 
 void yyerror(NodesManager &manager, const char *s)
-
-	{
+{
     extern int yylineno;
     extern char *yytext;
-    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line "
-        << yylineno << endl;
+    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line " << yylineno << endl;
 }

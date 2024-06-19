@@ -595,7 +595,7 @@ Decl:
 	ConstDecl 
 	{
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::const_decl;
+        decl->type = "const_decl";
         decl->decl = (BaseAST*)($1);
         $$ = decl;
     }|
@@ -603,7 +603,7 @@ Decl:
 	VarDecl 
 	{
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::var_decl;
+        decl->type = "var_decl";
         decl->decl = (BaseAST*)($1);
         $$ = decl;
     }
