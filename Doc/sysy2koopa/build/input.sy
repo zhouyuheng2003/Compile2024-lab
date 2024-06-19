@@ -1,0 +1,36 @@
+int var;
+
+int func(int x) {
+    var = var + x;
+    return var;
+}
+
+int main() {
+    // 注释
+    const int x = 233 * 4;
+    int a = 1;
+    int b = 1 + 2 * -3, c = 3;
+    {
+        int a = 0;
+        a = a + b / 2;
+    }
+    if (a == 2 || a >= 4) {
+        return 0;
+    } else {
+        b = a + 1;
+    }
+    int i = 0, pow = 1;
+    while (i < 7) {
+        pow = pow * 2;
+        i = i + 1;
+        if (i > 3){
+            break;
+        }
+    }
+    a + 3;
+    putint(func(1));
+    var = var * 10;
+    putint(func(var));
+    putch(10);
+    return +(- -!6); // 注释
+}

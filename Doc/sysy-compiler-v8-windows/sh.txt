@@ -1,0 +1,11 @@
+打开：
+docker run -it --rm -v K:\Document\Compile2024-lab\Doc\sysy-compiler-v8:/root/compiler maxxing/compiler-dev bash
+cd compiler
+配环境（已经做过了）：
+mkdir build
+cd build
+cmake ..
+编译：
+make
+运行：
+./compiler -koopa input.sy -o output.koopa
