@@ -222,7 +222,7 @@ ClosedStmt:
     RETURN Exp ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ret;
+        stmt->type = "ret";
         stmt->block_exp = (BaseAST*)($2);
         $$ = stmt;
     }|
@@ -230,7 +230,7 @@ ClosedStmt:
 	RETURN ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ret;
+        stmt->type = "ret";
         stmt->block_exp = nullptr;
         $$ = stmt;
     }|
@@ -238,7 +238,7 @@ ClosedStmt:
 	LVal '=' Exp ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::lval;
+        stmt->type = "lval";
         stmt->lval = *($1);
         delete $1;
         stmt->block_exp = (BaseAST*)($3);
@@ -248,7 +248,7 @@ ClosedStmt:
 	Block 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::block;
+        stmt->type = "block";
         stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
     }|
@@ -256,7 +256,7 @@ ClosedStmt:
 	Exp ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::exp;
+        stmt->type = "exp";
         stmt->block_exp = (BaseAST*)($1);
         $$ = stmt;
     }|
@@ -264,7 +264,7 @@ ClosedStmt:
 	';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::exp;
+        stmt->type = "exp";
         stmt->block_exp = nullptr;
         $$ = stmt;
     }|
@@ -272,14 +272,14 @@ ClosedStmt:
 	BREAK ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::break_;
+        stmt->type = "break_";
         $$ = stmt;
     }|
 
 	CONTINUE ';' 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::continue_;
+        stmt->type = "continue_";
         $$ = stmt;
     }|
 
@@ -288,7 +288,7 @@ ClosedStmt:
 	IF '(' Exp ')' ClosedStmt ELSE ClosedStmt 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ifelse;
+        stmt->type = "ifelse";
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         stmt->else_stmt = (BaseAST*)($7);
@@ -298,7 +298,7 @@ ClosedStmt:
 	WHILE '(' Exp ')' ClosedStmt 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::while_;
+        stmt->type = "while_";
         stmt->exp_simple = (BaseAST*)($3);
         stmt->while_stmt = (BaseAST*)($5);
         $$ = stmt;
@@ -309,7 +309,7 @@ OpenStmt:
 	IF '(' Exp ')' Stmt 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::if_;
+        stmt->type = "if_";
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         $$ = stmt;
@@ -318,7 +318,7 @@ OpenStmt:
 	IF '(' Exp ')' ClosedStmt ELSE OpenStmt 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ifelse;
+        stmt->type = "ifelse";
         stmt->exp_simple = (BaseAST*)($3);
         stmt->if_stmt = (BaseAST*)($5);
         stmt->else_stmt = (BaseAST*)($7);
@@ -328,7 +328,7 @@ OpenStmt:
 	WHILE '(' Exp ')' OpenStmt 
 	{
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::while_;
+        stmt->type = "while_";
         stmt->exp_simple = (BaseAST*)($3);
         stmt->while_stmt = (BaseAST*)($5);
         $$ = stmt;
@@ -527,7 +527,7 @@ UnaryExp:
 	PrimaryExp 
 	{
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::primary;
+        unary_exp->type = "primary";
         unary_exp->exp = (BaseAST*)($1);
         $$ = unary_exp;
     }|
@@ -535,7 +535,7 @@ UnaryExp:
 	UNARYOP UnaryExp 
 	{
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::unary;
+        unary_exp->type = "unary";
         unary_exp->op = *($1);
         delete $1;
         unary_exp->exp = (BaseAST*)($2);
@@ -545,7 +545,7 @@ UnaryExp:
 	IDENT '(' ')' 
 	{
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::func_call;
+        unary_exp->type = "func_call";
         unary_exp->ident = *($1);
         delete $1;
         $$ = unary_exp;
@@ -554,7 +554,7 @@ UnaryExp:
 	IDENT '(' FuncRParams ')' 
 	{
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::func_call;
+        unary_exp->type = "func_call";
         unary_exp->ident = *($1);
         delete $1;
         vector<BaseAST*> *v_ptr = ($3);
@@ -568,7 +568,7 @@ PrimaryExp:
 	'(' Exp ')' 
 	{
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::exp;
+        primary_exp->type = "exp";
         primary_exp->exp = (BaseAST*)($2);
         $$ = primary_exp;
     }|
@@ -576,7 +576,7 @@ PrimaryExp:
 	Number 
 	{
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::number;
+        primary_exp->type = "number";
         primary_exp->number = ($1);
         $$ = primary_exp;
     }|
@@ -584,7 +584,7 @@ PrimaryExp:
 	LVal 
 	{
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::lval;
+        primary_exp->type = "lval";
         primary_exp->lval = *($1);
         delete $1;
         $$ = primary_exp;
@@ -595,7 +595,7 @@ Decl:
 	ConstDecl 
 	{
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::const_decl;
+        decl->type = "const_decl";
         decl->decl = (BaseAST*)($1);
         $$ = decl;
     }|
@@ -603,7 +603,7 @@ Decl:
 	VarDecl 
 	{
         auto decl = manager.create_DeclAST();
-        decl->type = DeclType::var_decl;
+        decl->type = "var_decl";
         decl->decl = (BaseAST*)($1);
         $$ = decl;
     }
@@ -646,7 +646,7 @@ BlockItem:
 	Decl 
 	{
         auto block_item = manager.create_BlockItemAST();
-        block_item->type = BlockItemType::decl;
+        block_item->type = "decl";
         block_item->content = (BaseAST*)($1);
         $$ = block_item;
     }|
@@ -654,7 +654,7 @@ BlockItem:
 	Stmt 
 	{
         auto block_item = manager.create_BlockItemAST();
-        block_item->type = BlockItemType::stmt;
+        block_item->type = "stmt";
         block_item->content = (BaseAST*)($1);
         $$ = block_item;
     }
@@ -824,10 +824,8 @@ UNARYOP:
 %%
 
 void yyerror(NodesManager &manager, const char *s)
-
-	{
+{
     extern int yylineno;
     extern char *yytext;
-    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line "
-        << yylineno << endl;
+    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line " << yylineno << endl;
 }

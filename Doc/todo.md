@@ -228,3 +228,9 @@ g++ main.cpp -LK:\Document\Compile2024-lab\Doc\sysy-compiler-koopa2riscV-windows
 **look_up_symbol_tables**
 
 删除法符号表，从后往前
+
+var_num同一个标识符的出现次数
+
+if_else_num代表ifelse数量
+
+symbol_num代表中间变量数量

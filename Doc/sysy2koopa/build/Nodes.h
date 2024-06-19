@@ -68,21 +68,11 @@ private:
     std::string stringValue;
 };
 
-enum class UnaryExpType { primary, unary, func_call };
-enum class PrimaryExpType { exp, number, lval };
-enum class StmtType { if_, ifelse, simple, while_,lval, exp, block, ret, break_, continue_ };
-enum class BlockItemType { decl, stmt };
-
-
-
-static int symbol_num = 0;
-static int if_else_num = 0;
-static int while_num = 0;
-
-
-
-static map<string, int> var_num;
-static vector<int> while_stack;
+static int count_temp = 0;
+static int count_ifelse = 0;
+static int count_while = 0;
+static map<string, int> count_iden;
+static vector<int> stack_while;
 
 
 static vector<map<string, MyVar>>symbol_tables;
@@ -237,28 +227,24 @@ public:
         else if (op == "||")
         {
             string left_result = l_or_exp->outputIR();
-            string then_label = "\%then_" + to_string(if_else_num);
-            string else_label = "\%else_" + to_string(if_else_num);
-            string end_label = "\%end_" + to_string(if_else_num++);
-            string result_var_ptr = "%" + to_string(symbol_num++);
+            string then_label = "\%then_" + to_string(count_ifelse);
+            string else_label = "\%else_" + to_string(count_ifelse);
+            string end_label = "\%end_" + to_string(count_ifelse++);
+            string result_var_ptr = "%" + to_string(count_temp++);
             cout << '\t' << result_var_ptr << " = alloc i32" << endl;
-            cout << "\tbr " << left_result << ", " << then_label << ", "
-                << else_label << endl;
+            cout << "\tbr " << left_result << ", " << then_label << ", " << else_label << endl;
             cout << then_label << ":" << endl;
             cout << "\tstore 1, " << result_var_ptr << endl;
             cout << "\tjump " << end_label << endl;
             cout << else_label << ":" << endl;
-            string tmp_result_var = "%" + to_string(symbol_num++);
+            string tmp_result_var = "%" + to_string(count_temp++);
             string right_result = l_and_exp->outputIR();
-            cout << '\t' << tmp_result_var << " = ne " << right_result
-                << ", 0" << endl;
-            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
-                << endl;
+            cout << '\t' << tmp_result_var << " = ne " << right_result << ", 0" << endl;
+            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr << endl;
             cout << "\tjump " << end_label << endl;
             cout << end_label << ":" << endl;
-            result_var = "%" + to_string(symbol_num++);
-            cout << '\t' << result_var << " = load " << result_var_ptr
-                << endl;
+            result_var = "%" + to_string(count_temp++);
+            cout << '\t' << result_var << " = load " << result_var_ptr << endl;
         }
         else assert(0);
         return result_var;
@@ -292,28 +278,24 @@ public:
         else if (op == "&&")
         {
             string left_result = l_and_exp->outputIR();
-            string then_label = "\%then_" + to_string(if_else_num);
-            string else_label = "\%else_" + to_string(if_else_num);
-            string end_label = "\%end_" + to_string(if_else_num++);
-            string result_var_ptr = "%" + to_string(symbol_num++);
+            string then_label = "\%then_" + to_string(count_ifelse);
+            string else_label = "\%else_" + to_string(count_ifelse);
+            string end_label = "\%end_" + to_string(count_ifelse++);
+            string result_var_ptr = "%" + to_string(count_temp++);
             cout << '\t' << result_var_ptr << " = alloc i32" << endl;
-            cout << "\tbr " << left_result << ", " << then_label << ", "
-                << else_label << endl;
+            cout << "\tbr " << left_result << ", " << then_label << ", " << else_label << endl;
             cout << then_label << ":" << endl;
-            string tmp_result_var = "%" + to_string(symbol_num++);
+            string tmp_result_var = "%" + to_string(count_temp++);
             string right_result = eq_exp->outputIR();
-            cout << '\t' << tmp_result_var << " = ne " << right_result
-                << ", 0" << endl;
-            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr
-                << endl;
+            cout << '\t' << tmp_result_var << " = ne " << right_result << ", 0" << endl;
+            cout << "\tstore " << tmp_result_var << ", " << result_var_ptr << endl;
             cout << "\tjump " << end_label << endl;
             cout << else_label << ":" << endl;
             cout << "\tstore 0, " << result_var_ptr << endl;
             cout << "\tjump " << end_label << endl;
             cout << end_label << ":" << endl;
-            result_var = "%" + to_string(symbol_num++);
-            cout << '\t' << result_var << " = load " << result_var_ptr
-                << endl;
+            result_var = "%" + to_string(count_temp++);
+            cout << '\t' << result_var << " = load " << result_var_ptr << endl;
         }
         else assert(0);
         return result_var;
@@ -348,7 +330,7 @@ public:
         {
             string left_result = eq_exp->outputIR();
             string right_result = rel_exp->outputIR();
-            result_var = "%" + to_string(symbol_num++);
+            result_var = "%" + to_string(count_temp++);
             if (op == "==")
                 cout << '\t' << result_var << " = eq " << left_result <<
                     ", " << right_result << endl;
@@ -390,7 +372,7 @@ public:
         {
             string left_result = rel_exp->outputIR();
             string right_result = add_exp->outputIR();
-            result_var = "%" + to_string(symbol_num++);
+            result_var = "%" + to_string(count_temp++);
             if (op == "<")
                 cout << '\t' << result_var << " = lt " << left_result <<
                     ", " << right_result << endl;
@@ -440,7 +422,7 @@ public:
         {
             string left_result = add_exp->outputIR();
             string right_result = mul_exp->outputIR();
-            result_var = "%" + to_string(symbol_num++);
+            result_var = "%" + to_string(count_temp++);
             if (op == "+")
                 cout << '\t' << result_var << " = add " << left_result <<
                     ", " << right_result << endl;
@@ -482,7 +464,7 @@ public:
         {
             string left_result = mul_exp->outputIR();
             string right_result = unary_exp->outputIR();
-            result_var = "%" + to_string(symbol_num++);
+            result_var = "%" + to_string(count_temp++);
             if (op == "*")
                 cout << '\t' << result_var << " = mul " << left_result <<
                     ", " << right_result << endl;
@@ -517,28 +499,28 @@ public:
 class UnaryExpAST : public BaseAST
 {
 public:
-    UnaryExpType type;
+    string type;
     string op;
     BaseAST* exp;//PrimaryExpAST 或 本身
     string ident;
     vector<BaseAST*> params;
     string outputIR() const override
     {
-        if (type == UnaryExpType::primary)return exp->outputIR();
-        else if (type == UnaryExpType::unary)
+        if (type == "primary")return exp->outputIR();
+        else if (type == "unary")
         {
             string result_var = exp->outputIR();
-            string next_var = "%" + to_string(symbol_num);
+            string next_var = "%" + to_string(count_temp);
             if (op == "+")return result_var;
             else if (op == "-")cout << '\t' << next_var << " = sub 0, " <<
                 result_var << endl;
             else if (op == "!")cout << '\t' << next_var << " = eq " <<
                 result_var << ", 0" << endl;
             else assert(0);
-            symbol_num++;
+            count_temp++;
             return next_var;
         }
-        else if (type == UnaryExpType::func_call)
+        else if (type == "func_call")
         {
             vector<string> param_vars;
             for (auto param : params)
@@ -547,7 +529,7 @@ public:
             assert(function_param_num[ident] == params.size());
             string result_var = "";
             if (function_ret_type[ident] == "int")
-                result_var = "%" + to_string(symbol_num++);
+                result_var = "%" + to_string(count_temp++);
             string name = function_table[ident];
             cout << '\t';
             if (function_ret_type[ident] == "int")
@@ -567,8 +549,8 @@ public:
     virtual int caculateExp() const override
     {
         int result = 0;
-        if (type == UnaryExpType::primary)result = exp->caculateExp();
-        else if (type == UnaryExpType::unary)
+        if (type == "primary")result = exp->caculateExp();
+        else if (type == "unary")
         {
             int tmp = exp->caculateExp();
             if (op == "+")result = tmp;
@@ -585,7 +567,7 @@ public:
 class PrimaryExpAST : public BaseAST
 {
 public:
-    PrimaryExpType type;
+    string type;
     BaseAST* exp;//ExpAST
     string lval;
     int number;
@@ -593,15 +575,15 @@ public:
     string outputIR() const override
     {
         string result_var = "";
-        if (type == PrimaryExpType::exp)result_var = exp->outputIR();
-        else if (type == PrimaryExpType::number)result_var = to_string(number);
-        else if (type == PrimaryExpType::lval)
+        if (type == "exp")result_var = exp->outputIR();
+        else if (type == "number")result_var = to_string(number);
+        else if (type == "lval")
         {
             MyVar value = get_val_in_symbol_tables(lval);
             if (value.index() == 0)result_var = to_string(value.getIntValue());
             else
             {
-                result_var = "%" + to_string(symbol_num++);
+                result_var = "%" + to_string(count_temp++);
                 cout << '\t' << result_var << " = load " << value.getStringValue() << endl;
             }
         }
@@ -611,9 +593,9 @@ public:
     virtual int caculateExp() const override
     {
         int result = 0;
-        if (type == PrimaryExpType::exp)result = exp->caculateExp();
-        else if (type == PrimaryExpType::number)result = number;
-        else if (type == PrimaryExpType::lval)
+        if (type == "exp")result = exp->caculateExp();
+        else if (type == "number")result = number;
+        else if (type == "lval")
         {
             MyVar value = get_val_in_symbol_tables(lval);
             assert(value.index() == 0);
@@ -623,9 +605,6 @@ public:
         return result;
     }
 };
-
-
-
 
 
 class VarDeclAST : public BaseAST
@@ -653,12 +632,11 @@ class VarDefAST : public BaseAST
 public:
     string ident;
     bool has_init_val;
-    BaseAST* init_val;
+    BaseAST* init_val;//InitValAST
     string outputIR() const override
     {
         string var_name = "@" + ident;
-        string name = var_name + "_" +
-            to_string(var_num[var_name]++);
+        string name = var_name + "_" + to_string(count_iden[var_name]++);
         cout << '\t' << name << " = alloc i32" << endl;
         symbol_tables.back()[ident] = name;
         if (has_init_val)
@@ -671,8 +649,7 @@ public:
     int caculateExp() const override
     {
         string var_name = "@" + ident;
-        string name = var_name + "_" +
-            to_string(var_num[var_name]++);
+        string name = var_name + "_" + to_string(count_iden[var_name]++);
         symbol_tables.back()[ident] = name;
         if (has_init_val)
         {
@@ -682,9 +659,7 @@ public:
             else if (val_var != "0")cout << val_var << endl;
             else cout << "zeroinit" << endl;
         }
-        else
-            cout << "global " << name << " = alloc i32, zeroinit" <<
-                endl;
+        else cout << "global " << name << " = alloc i32, zeroinit" << endl;
         return 0;
     }
 };
@@ -693,26 +668,8 @@ public:
 class InitValAST : public BaseAST
 {
 public:
-    BaseAST* exp;
+    BaseAST* exp;//ExpAST
     string outputIR() const override { return exp->outputIR(); }
-};
-
-
-class FuncFParamAST : public BaseAST
-{
-public:
-    string b_type;
-    string ident;
-    string outputIR() const override
-    {
-        assert(b_type == "int");
-        string param_name = "@" + ident;
-        string name = param_name + "_" +
-            to_string(var_num[param_name]++);
-        cout << name;
-        return name;
-    }
-    string get_ident() const override { return ident; }
 };
 
 
@@ -761,6 +718,23 @@ public:
 };
 
 
+class FuncFParamAST : public BaseAST
+{
+public:
+    string b_type;
+    string ident;
+    string outputIR() const override
+    {
+        assert(b_type == "int");
+        string param_name = "@" + ident;
+        string name = param_name + "_" +
+            to_string(count_iden[param_name]++);
+        cout << name;
+        return name;
+    }
+    string get_ident() const override { return ident; }
+};
+
 class BlockAST : public BaseAST
 {
 public:
@@ -797,10 +771,19 @@ public:
 };
 
 
+class BlockItemAST : public BaseAST
+{
+public:
+    string type;
+    BaseAST* content;
+    string outputIR() const override { return content->outputIR(); }
+};
+
+
 class StmtAST : public BaseAST
 {
 public:
-    StmtType type;
+    string type;
     BaseAST* exp_simple;
     BaseAST* if_stmt;
     BaseAST* else_stmt;
@@ -809,8 +792,8 @@ public:
     BaseAST* block_exp;
     string outputIR() const override
     {
-        if (type == StmtType::simple)return exp_simple->outputIR();
-        if (type == StmtType::ret)
+        if (type == "simple")return exp_simple->outputIR();
+        if (type == "ret")
         {
             if (block_exp == nullptr)
             {
@@ -825,7 +808,7 @@ public:
             }
             return "ret";
         }
-        else if (type == StmtType::lval)
+        else if (type == "lval")
         {
             string result_var = block_exp->outputIR();
             MyVar value = get_val_in_symbol_tables(lval);
@@ -833,32 +816,32 @@ public:
             cout << "\tstore " << result_var << ", " <<
                 value.getStringValue() << endl;
         }
-        else if (type == StmtType::exp)
+        else if (type == "exp")
         {
             if (block_exp != nullptr)block_exp->outputIR();
         }
-        else if (type == StmtType::block)return block_exp->outputIR();
-        else if (type == StmtType::break_)
+        else if (type == "block")return block_exp->outputIR();
+        else if (type == "break_")
         {
-            assert(!while_stack.empty());
-            int while_no = while_stack.back();
+            assert(!stack_while.empty());
+            int while_no = stack_while.back();
             string end_label = "\%while_end_" + to_string(while_no);
             cout << "\tjump " << end_label << endl;
             return "break";
         }
-        else if (type == StmtType::continue_)
+        else if (type == "continue_")
         {
-            assert(!while_stack.empty());
-            int while_no = while_stack.back();
+            assert(!stack_while.empty());
+            int while_no = stack_while.back();
             string entry_label = "\%while_" + to_string(while_no);
             cout << "\tjump " << entry_label << endl;
             return "cont";
         }
-        else if (type == StmtType::if_)
+        else if (type == "if_")
         {
             string if_result = exp_simple->outputIR();
-            string then_label = "\%then_" + to_string(if_else_num);
-            string end_label = "\%end_" + to_string(if_else_num++);
+            string then_label = "\%then_" + to_string(count_ifelse);
+            string end_label = "\%end_" + to_string(count_ifelse++);
             cout << "\tbr " << if_result << ", " << then_label << ", " <<
                 end_label << endl;
             cout << then_label << ":" << endl;
@@ -868,12 +851,12 @@ public:
                 cout << "\tjump " << end_label << endl;
             cout << end_label << ":" << endl;
         }
-        else if (type == StmtType::ifelse)
+        else if (type == "ifelse")
         {
             string if_result = exp_simple->outputIR();
-            string then_label = "\%then_" + to_string(if_else_num);
-            string else_label = "\%else_" + to_string(if_else_num);
-            string end_label = "\%end_" + to_string(if_else_num++);
+            string then_label = "\%then_" + to_string(count_ifelse);
+            string else_label = "\%else_" + to_string(count_ifelse);
+            string end_label = "\%end_" + to_string(count_ifelse++);
             cout << "\tbr " << if_result << ", " << then_label << ", " <<
                 else_label << endl;
             cout << then_label << ":" << endl;
@@ -892,34 +875,25 @@ public:
                 return "ret";
             else cout << end_label << ":" << endl;
         }
-        else if (type == StmtType::while_)
+        else if (type == "while_")
         {
-            string entry_label = "\%while_" + to_string(while_num);
-            string body_label = "\%do_" + to_string(while_num);
-            string end_label = "\%while_end_" + to_string(while_num);
-            while_stack.push_back(while_num++);
+            string entry_label = "\%while_" + to_string(count_while);
+            string body_label = "\%do_" + to_string(count_while);
+            string end_label = "\%while_end_" + to_string(count_while);
+            stack_while.push_back(count_while++);
             cout << "\tjump " << entry_label << endl;
             cout << entry_label << ":" << endl;
             string while_result = exp_simple->outputIR();
-            cout << "\tbr " << while_result << ", " << body_label << ", "
-                << end_label << endl;
+            cout << "\tbr " << while_result << ", " << body_label << ", " << end_label << endl;
             cout << body_label << ":" << endl;
             string while_stmt_type = while_stmt->outputIR();
             if (while_stmt_type != "ret" && while_stmt_type != "break" &&
                 while_stmt_type != "cont")
                 cout << "\tjump " << entry_label << endl;
             cout << end_label << ":" << endl;
-            while_stack.pop_back();
+            stack_while.pop_back();
         }
         else assert(0);
         return "";
     }
-};
-
-class BlockItemAST : public BaseAST
-{
-public:
-    BlockItemType type;
-    BaseAST* content;
-    string outputIR() const override { return content->outputIR(); }
 };

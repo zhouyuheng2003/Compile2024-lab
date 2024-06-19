@@ -15,6 +15,7 @@
   sys2koopa input.sy output.koopa
   ```
 
+
 ### 生成目标代码
 
 如果需要生成目标代码，可以运行setup中提供的koopa2riscv，比如要讲output.koopa转化为output.riscv，需要在unix环境下执行

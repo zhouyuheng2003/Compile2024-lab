@@ -1736,7 +1736,7 @@ yyreduce:
 #line 223 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ret;
+        stmt->type = "ret";
         stmt->block_exp = (BaseAST*)((yyvsp[(2) - (3)].astPointer));
         (yyval.astPointer) = stmt;
     ;}
@@ -1748,7 +1748,7 @@ yyreduce:
 #line 231 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ret;
+        stmt->type = "ret";
         stmt->block_exp = nullptr;
         (yyval.astPointer) = stmt;
     ;}
@@ -1760,7 +1760,7 @@ yyreduce:
 #line 239 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::lval;
+        stmt->type = "lval";
         stmt->lval = *((yyvsp[(1) - (4)].stringPointer));
         delete (yyvsp[(1) - (4)].stringPointer);
         stmt->block_exp = (BaseAST*)((yyvsp[(3) - (4)].astPointer));
@@ -1774,7 +1774,7 @@ yyreduce:
 #line 249 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::block;
+        stmt->type = "block";
         stmt->block_exp = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = stmt;
     ;}
@@ -1786,7 +1786,7 @@ yyreduce:
 #line 257 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::exp;
+        stmt->type = "exp";
         stmt->block_exp = (BaseAST*)((yyvsp[(1) - (2)].astPointer));
         (yyval.astPointer) = stmt;
     ;}
@@ -1798,7 +1798,7 @@ yyreduce:
 #line 265 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::exp;
+        stmt->type = "exp";
         stmt->block_exp = nullptr;
         (yyval.astPointer) = stmt;
     ;}
@@ -1810,7 +1810,7 @@ yyreduce:
 #line 273 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::break_;
+        stmt->type = "break_";
         (yyval.astPointer) = stmt;
     ;}
     break;
@@ -1821,7 +1821,7 @@ yyreduce:
 #line 280 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::continue_;
+        stmt->type = "continue_";
         (yyval.astPointer) = stmt;
     ;}
     break;
@@ -1832,7 +1832,7 @@ yyreduce:
 #line 289 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ifelse;
+        stmt->type = "ifelse";
         stmt->exp_simple = (BaseAST*)((yyvsp[(3) - (7)].astPointer));
         stmt->if_stmt = (BaseAST*)((yyvsp[(5) - (7)].astPointer));
         stmt->else_stmt = (BaseAST*)((yyvsp[(7) - (7)].astPointer));
@@ -1846,7 +1846,7 @@ yyreduce:
 #line 299 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::while_;
+        stmt->type = "while_";
         stmt->exp_simple = (BaseAST*)((yyvsp[(3) - (5)].astPointer));
         stmt->while_stmt = (BaseAST*)((yyvsp[(5) - (5)].astPointer));
         (yyval.astPointer) = stmt;
@@ -1859,7 +1859,7 @@ yyreduce:
 #line 310 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::if_;
+        stmt->type = "if_";
         stmt->exp_simple = (BaseAST*)((yyvsp[(3) - (5)].astPointer));
         stmt->if_stmt = (BaseAST*)((yyvsp[(5) - (5)].astPointer));
         (yyval.astPointer) = stmt;
@@ -1872,7 +1872,7 @@ yyreduce:
 #line 319 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::ifelse;
+        stmt->type = "ifelse";
         stmt->exp_simple = (BaseAST*)((yyvsp[(3) - (7)].astPointer));
         stmt->if_stmt = (BaseAST*)((yyvsp[(5) - (7)].astPointer));
         stmt->else_stmt = (BaseAST*)((yyvsp[(7) - (7)].astPointer));
@@ -1886,7 +1886,7 @@ yyreduce:
 #line 329 "sysy.y"
     {
         auto stmt = manager.create_StmtAST();
-        stmt->type = StmtType::while_;
+        stmt->type = "while_";
         stmt->exp_simple = (BaseAST*)((yyvsp[(3) - (5)].astPointer));
         stmt->while_stmt = (BaseAST*)((yyvsp[(5) - (5)].astPointer));
         (yyval.astPointer) = stmt;
@@ -2152,7 +2152,7 @@ yyreduce:
 #line 528 "sysy.y"
     {
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::primary;
+        unary_exp->type = "primary";
         unary_exp->exp = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = unary_exp;
     ;}
@@ -2164,7 +2164,7 @@ yyreduce:
 #line 536 "sysy.y"
     {
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::unary;
+        unary_exp->type = "unary";
         unary_exp->op = *((yyvsp[(1) - (2)].stringPointer));
         delete (yyvsp[(1) - (2)].stringPointer);
         unary_exp->exp = (BaseAST*)((yyvsp[(2) - (2)].astPointer));
@@ -2178,7 +2178,7 @@ yyreduce:
 #line 546 "sysy.y"
     {
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::func_call;
+        unary_exp->type = "func_call";
         unary_exp->ident = *((yyvsp[(1) - (3)].stringPointer));
         delete (yyvsp[(1) - (3)].stringPointer);
         (yyval.astPointer) = unary_exp;
@@ -2191,7 +2191,7 @@ yyreduce:
 #line 555 "sysy.y"
     {
         auto unary_exp = manager.create_UnaryExpAST();
-        unary_exp->type = UnaryExpType::func_call;
+        unary_exp->type = "func_call";
         unary_exp->ident = *((yyvsp[(1) - (4)].stringPointer));
         delete (yyvsp[(1) - (4)].stringPointer);
         vector<BaseAST*> *v_ptr = ((yyvsp[(3) - (4)].vectorPointer));
@@ -2207,7 +2207,7 @@ yyreduce:
 #line 569 "sysy.y"
     {
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::exp;
+        primary_exp->type = "exp";
         primary_exp->exp = (BaseAST*)((yyvsp[(2) - (3)].astPointer));
         (yyval.astPointer) = primary_exp;
     ;}
@@ -2219,7 +2219,7 @@ yyreduce:
 #line 577 "sysy.y"
     {
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::number;
+        primary_exp->type = "number";
         primary_exp->number = ((yyvsp[(1) - (1)].integer32));
         (yyval.astPointer) = primary_exp;
     ;}
@@ -2231,7 +2231,7 @@ yyreduce:
 #line 585 "sysy.y"
     {
         auto primary_exp = manager.create_PrimaryExpAST();
-        primary_exp->type = PrimaryExpType::lval;
+        primary_exp->type = "lval";
         primary_exp->lval = *((yyvsp[(1) - (1)].stringPointer));
         delete (yyvsp[(1) - (1)].stringPointer);
         (yyval.astPointer) = primary_exp;
@@ -2307,7 +2307,7 @@ yyreduce:
 #line 647 "sysy.y"
     {
         auto block_item = manager.create_BlockItemAST();
-        block_item->type = BlockItemType::decl;
+        block_item->type = "decl";
         block_item->content = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = block_item;
     ;}
@@ -2319,7 +2319,7 @@ yyreduce:
 #line 655 "sysy.y"
     {
         auto block_item = manager.create_BlockItemAST();
-        block_item->type = BlockItemType::stmt;
+        block_item->type = "stmt";
         block_item->content = (BaseAST*)((yyvsp[(1) - (1)].astPointer));
         (yyval.astPointer) = block_item;
     ;}
