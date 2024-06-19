@@ -824,10 +824,8 @@ UNARYOP:
 %%
 
 void yyerror(NodesManager &manager, const char *s)
-
-	{
+{
     extern int yylineno;
     extern char *yytext;
-    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line "
-        << yylineno << endl;
+    cerr << "ERROR: " << s << " at symbol '" << yytext << "' on line " << yylineno << endl;
 }

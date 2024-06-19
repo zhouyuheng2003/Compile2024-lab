@@ -200,7 +200,31 @@ cout用define进行简化
 
 ### windows化
 
+先安装flex和bison
+
+在src目录下
+
 ```
-g++ main.cpp -o compiler.exe -std=c++17
+flex -l sysy.l
+bison -d sysy.y
+g++ main.cpp lex.yy.c sysy.tab.c -o compiler.exe -std=c++11
+compiler input.sy output.koopa
 ```
 
+
+
+```
+g++ main.cpp -L../Lib -lkoopa -lws2_32 -ladvapi32 -o koopa2riscv.exe -std=c++11
+```
+
+```
+g++ main.cpp -LK:\Document\Compile2024-lab\Doc\sysy-compiler-koopa2riscV-windows\Lib -lkoopa -o koopa2riscv -lpthread -ldl
+```
+
+
+
+## 代码含义
+
+**look_up_symbol_tables**
+
+删除法符号表，从后往前
