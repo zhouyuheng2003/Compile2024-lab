@@ -9,6 +9,14 @@ class NodesManager
 {
 public:
     NodesManager(){}
+    ~NodesManager(){
+        for (auto node : nodes){
+            delete(node);
+        }
+        for (auto vec: vectors){
+            delete (vec);
+        }
+    }
     BaseAST* root;
     vector <BaseAST*> nodes; 
     vector <vector<BaseAST*>*> vectors;

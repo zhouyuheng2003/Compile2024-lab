@@ -11,7 +11,7 @@
   ```
   flex -l sysy.l
   bison -d sysy.y
-  g++ main.cpp lex.yy.c sysy.tab.c -o sys2koopa.exe
+  g++ main.cpp lex.yy.c sysy.tab.c -o sys2koopa.exe -std=c++11
   sys2koopa input.sy output.koopa
   ```
 
